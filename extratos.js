@@ -227,6 +227,10 @@ class ExtratosManager {
             resultado = resultado.filter(t => Math.abs(t.valor) >= filtros.valorMinimo);
         }
         
+        if (filtros.membro) {
+            resultado = resultado.filter(t => t.membro && t.membro.includes(filtros.membro));
+        }
+        
         if (filtros.descricao) {
             const termo = filtros.descricao.toLowerCase();
             resultado = resultado.filter(t => 
@@ -308,3 +312,35 @@ class ExtratosManager {
 
 // InstÃ¢ncia global do gerenciador
 const extratosManager = new ExtratosManager();
+
+// === CENTRO DE CUSTO SIMPLES ===
+const MEMBROS = {
+    'SUELI MENEZES ROSA': 'Sueli (Mãe)',
+    'RENATO AVILA BARROS': 'Renato (Pai)',
+    'RODRIGO LONGUI': 'Rodrigo Longui',
+    'MARY HELLEN': 'Mary Hellen',
+    'AVILA TRANSPORTES': 'Ávila Transportes',
+    'NARDINI': 'Nardini Agroindustrial'
+};
+
+function identificarMembro(descricao) {
+    const desc = descricao.toUpperCase();
+    for (let [chave, nome] of Object.entries(MEMBROS)) {
+        if (desc.includes(chave)) {
+            return nome;
+        }
+    }
+    return 'Não identificado';
+}
+
+function processarMembros() {
+    extratosManager.extratosUnificados.forEach(t => {
+        t.membro = identificarMembro(t.descricao);
+    });
+}
+
+function filtrarPorMembro(nomeMembro) {
+    return extratosManager.extratosUnificados.filter(t => 
+        t.membro && t.membro.includes(nomeMembro)
+    );
+}

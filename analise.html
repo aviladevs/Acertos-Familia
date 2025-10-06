@@ -614,6 +614,7 @@
             const filtros = {
                 banco: document.getElementById('filterBanco')?.value,
                 categoria: document.getElementById('filterCategoria')?.value,
+                membro: document.getElementById('filterMembro')?.value,
                 tipo: document.getElementById('filterTipo')?.value,
                 dataInicio: document.getElementById('filterDataInicio')?.value,
                 dataFim: document.getElementById('filterDataFim')?.value,
@@ -655,6 +656,7 @@
                             <th>Descrição</th>
                             <th>Valor</th>
                             <th>Categoria</th>
+                            <th>Membro</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -667,6 +669,7 @@
                                     R$ ${Math.abs(t.valor).toFixed(2)}
                                 </td>
                                 <td><span class="categoria-tag">${t.categoria}</span></td>
+                                <td>${t.membro || 'N�o identificado'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
