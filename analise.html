@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acerto de Contas - Análise Financeira</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .upload-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            border-color: #667eea;
+            background-color: #f8faff;
+        }
+
+        .upload-box.dragover {
+            border-color: #667eea;
+            background-color: #e6f3ff;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-box .icon {
+            font-size: 2.5em;
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+
+        .upload-box .text {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .upload-box .subtext {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card.positive {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.negative {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card.neutral {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #4a5568;
+        }
+
+        .stat-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .filters {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .transactions-table th {
+            background: #4a5568;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .transactions-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .transactions-table tr:hover {
+            background-color: #f7fafc;
+        }
+
+        .valor-positivo {
+            color: #38a169;
+            font-weight: bold;
+        }
+
+        .valor-negativo {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        .categoria-tag {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .banco-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            color: white;
+        }
+
+        .banco-inter {
+            background: #ff6900;
+        }
+
+        .banco-nubank {
+            background: #8a05be;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .loading .spinner {
+            border: 3px solid #e2e8f0;
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Acerto de Contas da Família</h1>
+            <p>Análise Unificada dos Extratos Bancários - Inter & Nubank</p>
+        </div>
+
+        <div class="upload-section">
+            <h2>📁 Carregar Extratos Bancários</h2>
+            <div class="upload-grid">
+                <div class="upload-box" onclick="document.getElementById('interFile').click()">
+                    <div class="icon">🧡</div>
+                    <div class="text">Banco Inter</div>
+                    <div class="subtext">Selecione o arquivo CSV do extrato</div>
+                    <input type="file" id="interFile" accept=".csv" onchange="handleFileUpload(this, 'inter')">
+                </div>
+                
+                <div class="upload-box" onclick="document.getElementById('nubankFile').click()">
+                    <div class="icon">💜</div>
+                    <div class="text">Nubank</div>
+                    <div class="subtext">Selecione o arquivo CSV do extrato</div>
+                    <input type="file" id="nubankFile" accept=".csv" onchange="handleFileUpload(this, 'nubank')">
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" id="processBtn" onclick="processarExtratos()" disabled>
+                    📈 Processar e Analisar Extratos
+                </button>
+                <button class="btn" onclick="carregarDadosExemplo()" style="margin-left: 15px;">
+                    🎯 Carregar Dados de Exemplo
+                </button>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h2>📊 Resumo Financeiro</h2>
+            
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats cards will be inserted here -->
+            </div>
+
+            <div class="filters">
+                <h3>🔍 Filtros de Análise</h3>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Banco:</label>
+                        <select id="filterBanco" onchange="aplicarFiltros()">
+                            <option value="">Todos</option>
+                            <option value="Inter">Banco Inter</option>
+                            <option value="Nubank">Nubank</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Categoria:</label>
+                        <select id="filterCategoria" onchange="aplicarFiltros()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Tipo:</label>
+                        <select id="filterTipo" onchange="aplicarFiltros()">
+                            <option value="">Todos</option>
+                            <option value="Entrada">Entradas</option>
+                            <option value="Saída">Saídas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Data Início:</label>
+                        <input type="date" id="filterDataInicio" onchange="aplicarFiltros()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Data Fim:</label>
+                        <input type="date" id="filterDataFim" onchange="aplicarFiltros()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Valor Mínimo:</label>
+                        <input type="number" id="filterValorMinimo" placeholder="0.00" onchange="aplicarFiltros()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Buscar:</label>
+                        <input type="text" id="filterDescricao" placeholder="Descrição..." oninput="aplicarFiltros()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <button class="btn" onclick="limparFiltros()">🔄 Limpar Filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transactionsContainer">
+                <!-- Transactions table will be inserted here -->
+            </div>
+
+            <div class="export-section">
+                <button class="btn" onclick="exportarCSV()">📥 Exportar Dados CSV</button>
+                <button class="btn" onclick="mostrarTransacoesSuspeitas()">🔍 Analisar Transações Suspeitas</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="extratos.js"></script>
+    <script>
+        let interData = null;
+        let nubankData = null;
+        let transacoesFiltradas = [];
+
+        function handleFileUpload(input, banco) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (banco === 'inter') {
+                        interData = e.target.result;
+                        input.parentElement.style.borderColor = '#38a169';
+                        input.parentElement.style.backgroundColor = '#f0fff4';
+                    } else {
+                        nubankData = e.target.result;
+                        input.parentElement.style.borderColor = '#38a169';
+                        input.parentElement.style.backgroundColor = '#f0fff4';
+                    }
+                    
+                    checkProcessButton();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function checkProcessButton() {
+            const btn = document.getElementById('processBtn');
+            if (interData && nubankData) {
+                btn.disabled = false;
+                btn.textContent = '📈 Processar e Analisar Extratos';
+            } else if (interData || nubankData) {
+                btn.disabled = false;
+                btn.textContent = '📈 Processar Extrato Disponível';
+            }
+        }
+
+        function processarExtratos() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="spinner"></div><p>Processando extratos...</p>';
+            
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            resultsSection.innerHTML = '';
+            resultsSection.appendChild(loadingDiv);
+
+            setTimeout(() => {
+                try {
+                    const transacoes = extratosManager.carregarExtratos(interData, nubankData);
+                    transacoesFiltradas = transacoes;
+                    
+                    mostrarResultados();
+                    populateFilters();
+                } catch (error) {
+                    resultsSection.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #e53e3e;">
+                            <h3>❌ Erro ao processar extratos</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }, 1000);
+        }
+
+        function mostrarResultados() {
+            const resultsSection = document.getElementById('resultsSection');
+            const resumo = extratosManager.obterResumo();
+            
+            resultsSection.innerHTML = `
+                <h2>📊 Resumo Financeiro</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card positive">
+                        <h3>💰 Total de Entradas</h3>
+                        <div class="value">R$ ${resumo.totalEntradas}</div>
+                        <div>Receitas e transferências recebidas</div>
+                    </div>
+                    
+                    <div class="stat-card negative">
+                        <h3>💸 Total de Saídas</h3>
+                        <div class="value">R$ ${resumo.totalSaidas}</div>
+                        <div>Gastos e transferências enviadas</div>
+                    </div>
+                    
+                    <div class="stat-card ${parseFloat(resumo.saldo) >= 0 ? 'positive' : 'negative'}">
+                        <h3>⚖️ Saldo Líquido</h3>
+                        <div class="value">R$ ${resumo.saldo}</div>
+                        <div>${parseFloat(resumo.saldo) >= 0 ? 'Superávit' : 'Déficit'}</div>
+                    </div>
+                    
+                    <div class="stat-card neutral">
+                        <h3>📋 Transações</h3>
+                        <div class="value">${resumo.quantidadeTransacoes}</div>
+                        <div>Total de movimentações</div>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <h3>🔍 Filtros de Análise</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label>Banco:</label>
+                            <select id="filterBanco" onchange="aplicarFiltros()">
+                                <option value="">Todos</option>
+                                <option value="Inter">Banco Inter</option>
+                                <option value="Nubank">Nubank</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Categoria:</label>
+                            <select id="filterCategoria" onchange="aplicarFiltros()">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Tipo:</label>
+                            <select id="filterTipo" onchange="aplicarFiltros()">
+                                <option value="">Todos</option>
+                                <option value="Entrada">Entradas</option>
+                                <option value="Saída">Saídas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Data Início:</label>
+                            <input type="date" id="filterDataInicio" onchange="aplicarFiltros()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Data Fim:</label>
+                            <input type="date" id="filterDataFim" onchange="aplicarFiltros()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Valor Mínimo:</label>
+                            <input type="number" id="filterValorMinimo" placeholder="0.00" onchange="aplicarFiltros()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Buscar:</label>
+                            <input type="text" id="filterDescricao" placeholder="Descrição..." oninput="aplicarFiltros()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <button class="btn" onclick="limparFiltros()">🔄 Limpar Filtros</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="transactionsContainer"></div>
+
+                <div class="export-section">
+                    <button class="btn" onclick="exportarCSV()">📥 Exportar Dados CSV</button>
+                    <button class="btn" onclick="mostrarTransacoesSuspeitas()">🔍 Analisar Transações Suspeitas</button>
+                </div>
+            `;
+            
+            mostrarTransacoes(transacoesFiltradas);
+        }
+
+        function populateFilters() {
+            const categorias = [...new Set(extratosManager.extratosUnificados.map(t => t.categoria))];
+            const selectCategoria = document.getElementById('filterCategoria');
+            
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria;
+                option.textContent = categoria;
+                selectCategoria.appendChild(option);
+            });
+        }
+
+        function aplicarFiltros() {
+            const filtros = {
+                banco: document.getElementById('filterBanco')?.value,
+                categoria: document.getElementById('filterCategoria')?.value,
+                tipo: document.getElementById('filterTipo')?.value,
+                dataInicio: document.getElementById('filterDataInicio')?.value,
+                dataFim: document.getElementById('filterDataFim')?.value,
+                valorMinimo: parseFloat(document.getElementById('filterValorMinimo')?.value) || 0,
+                descricao: document.getElementById('filterDescricao')?.value
+            };
+            
+            transacoesFiltradas = extratosManager.filtrarTransacoes(filtros);
+            mostrarTransacoes(transacoesFiltradas);
+        }
+
+        function limparFiltros() {
+            document.getElementById('filterBanco').value = '';
+            document.getElementById('filterCategoria').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterDataInicio').value = '';
+            document.getElementById('filterDataFim').value = '';
+            document.getElementById('filterValorMinimo').value = '';
+            document.getElementById('filterDescricao').value = '';
+            
+            transacoesFiltradas = extratosManager.extratosUnificados;
+            mostrarTransacoes(transacoesFiltradas);
+        }
+
+        function mostrarTransacoes(transacoes) {
+            const container = document.getElementById('transactionsContainer');
+            
+            if (transacoes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #718096;">Nenhuma transação encontrada com os filtros aplicados.</p>';
+                return;
+            }
+            
+            const table = `
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Banco</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Categoria</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${transacoes.map(t => `
+                            <tr>
+                                <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                                <td><span class="banco-tag banco-${t.banco.toLowerCase()}">${t.banco}</span></td>
+                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${t.descricao}</td>
+                                <td class="${t.valor >= 0 ? 'valor-positivo' : 'valor-negativo'}">
+                                    R$ ${Math.abs(t.valor).toFixed(2)}
+                                </td>
+                                <td><span class="categoria-tag">${t.categoria}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = table;
+        }
+
+        function exportarCSV() {
+            const csv = extratosManager.exportarParaCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `extratos_unificados_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function mostrarTransacoesSuspeitas() {
+            const suspeitas = extratosManager.obterTransacoesSuspeitas();
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 80%; max-height: 80%; overflow-y: auto;">
+                    <h2>🔍 Análise de Transações Suspeitas</h2>
+                    
+                    <h3>💰 Transações de Alto Valor (> R$ 5.000)</h3>
+                    <p>Encontradas ${suspeitas.valoresAltos.length} transações de alto valor</p>
+                    
+                    <h3>🔄 Transações Repetidas (3+ no mesmo dia)</h3>
+                    <p>Encontradas ${suspeitas.transacoesRepetidas.length} transações repetidas</p>
+                    
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Add drag and drop functionality
+        ['interFile', 'nubankFile'].forEach(id => {
+            const element = document.getElementById(id).parentElement;
+            
+            element.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                element.classList.add('dragover');
+            });
+            
+            element.addEventListener('dragleave', () => {
+                element.classList.remove('dragover');
+            });
+            
+            element.addEventListener('drop', (e) => {
+                e.preventDefault();
+                element.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const input = element.querySelector('input[type="file"]');
+                    input.files = files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "sistema-acertos-familia",
+  "version": "1.0.0",
+  "description": "Sistema de controle de acertos financeiros da família com Ávila Transportes",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000",
+    "deploy": "echo 'Deploy para avilatransportes.com.br'"
+  },
+  "keywords": [
+    "acertos",
+    "família",
+    "financeiro",
+    "transportes"
+  ],
+  "author": "Sistema Família Rosa Avila Barros",
+  "license": "Private",
+  "homepage": "https://avilatransportes.com.br",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usuario/sistema-acertos-familia"
+  }
+}

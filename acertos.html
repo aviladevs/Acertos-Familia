@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ávila Transportes | Acertos Família</title>
+    <meta name="description" content="Dashboard de controle dos acertos financeiros da família com Ávila Transportes">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .user-info {
+            text-align: right;
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #4a5568;
+            font-size: 18px;
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.entradas::before { background: linear-gradient(90deg, #4299e1, #3182ce); }
+        .stat-card.saidas::before { background: linear-gradient(90deg, #f56565, #e53e3e); }
+        .stat-card.saldo::before { background: linear-gradient(90deg, #48bb78, #38a169); }
+        .stat-card.transacoes::before { background: linear-gradient(90deg, #9f7aea, #805ad5); }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .filters-title {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .filter-input {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .transactions-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .transactions-title {
+            font-size: 24px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+        .export-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .transactions-table th {
+            background: #f7fafc;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .transactions-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .transactions-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .banco-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .banco-inter {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .banco-nubank {
+            background: #a29bfe;
+            color: white;
+        }
+
+        .categoria-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .valor-positivo {
+            color: #38a169;
+            font-weight: 600;
+        }
+
+        .valor-negativo {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .no-data-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                text-align: center;
+            }
+
+            .user-info {
+                text-align: center;
+                margin-top: 15px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .transactions-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Categorias de cores */
+        .categoria-alimentacao { background: #fed7d7; color: #c53030; }
+        .categoria-transporte { background: #bee3f8; color: #2b6cb0; }
+        .categoria-saude { background: #c6f6d5; color: #276749; }
+        .categoria-educacao { background: #faf0e6; color: #d69e2e; }
+        .categoria-lazer { background: #e9d8fd; color: #553c9a; }
+        .categoria-transferencia { background: #e2e8f0; color: #4a5568; }
+        .categoria-outros { background: #fed7e2; color: #b83280; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>👨‍👩‍👧‍👦 Acertos Família Rosa Avila Barros</h1>
+            <p style="color: #666; margin-top: 5px;">Sistema de Controle Financeiro Familiar</p>
+        </div>
+        <div class="user-info">
+            <div class="user-name" id="userName">Membro da Família</div>
+            <div style="font-size: 14px; margin: 5px 0;">Acesso: <span id="accessTime"></span></div>
+            <button class="logout-btn" onclick="logout()">🚪 Sair</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Resumo Financeiro -->
+        <div class="stats-grid" id="statsContainer">
+            <div class="stat-card entradas">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" id="totalEntradas">R$ 0,00</div>
+                <div class="stat-label">Total de Entradas<br>Receitas e transferências recebidas</div>
+            </div>
+            <div class="stat-card saidas">
+                <div class="stat-icon">💸</div>
+                <div class="stat-value" id="totalSaidas">R$ 0,00</div>
+                <div class="stat-label">Total de Saídas<br>Gastos e transferências enviadas</div>
+            </div>
+            <div class="stat-card saldo">
+                <div class="stat-icon">⚖️</div>
+                <div class="stat-value" id="saldoLiquido">R$ 0,00</div>
+                <div class="stat-label">Saldo Líquido<br>Superávit</div>
+            </div>
+            <div class="stat-card transacoes">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalTransacoes">0</div>
+                <div class="stat-label">Transações<br>Total de movimentações</div>
+            </div>
+        </div>
+
+        <!-- Adicionar Nova Transação -->
+        <div class="filters-section" style="margin-bottom: 20px;">
+            <div class="filters-title">
+                ➕ Adicionar Nova Transação
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Tipo:</label>
+                    <select class="filter-input" id="novoTipo">
+                        <option value="divida">💸 Nova Dívida</option>
+                        <option value="recebimento">💰 Novo Recebimento</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Valor (R$):</label>
+                    <input type="number" step="0.01" class="filter-input" id="novoValor" placeholder="0,00">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Descrição:</label>
+                    <input type="text" class="filter-input" id="novaDescricao" placeholder="Descrição da transação">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Devedor:</label>
+                    <input type="text" class="filter-input" id="novoDevedor" placeholder="Quem deve">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Credor:</label>
+                    <input type="text" class="filter-input" id="novoCredor" placeholder="Para quem deve">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Vencimento:</label>
+                    <input type="date" class="filter-input" id="novoVencimento">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Categoria:</label>
+                    <select class="filter-input" id="novaCategoria">
+                        <option value="Empréstimo Familiar">Empréstimo Familiar</option>
+                        <option value="Manutenção Veículo">Manutenção Veículo</option>
+                        <option value="Despachante">Despachante</option>
+                        <option value="Pagamento Recebido">Pagamento Recebido</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Comprovante:</label>
+                    <input type="file" class="filter-input" id="novoComprovante" accept=".pdf,.jpg,.jpeg,.png" style="padding: 8px;">
+                    <small style="color: #666; font-size: 12px;">PDF, JPG ou PNG</small>
+                </div>
+            </div>
+            <div class="filter-actions" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="adicionarTransacao()">
+                    💾 Salvar Transação
+                </button>
+                <button class="btn btn-secondary" onclick="limparFormulario()">
+                    🧹 Limpar Campos
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-title">
+                🔍 Filtros de Análise
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Banco:</label>
+                    <select class="filter-input" id="filtroBank">
+                        <option value="">Todos</option>
+                        <option value="Inter">Banco Inter</option>
+                        <option value="Nubank">Nubank</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Categoria:</label>
+                    <select class="filter-input" id="filtroCategoria">
+                        <option value="">Todas</option>
+                        <option value="Empréstimo Familiar">Empréstimo Familiar</option>
+                        <option value="Manutenção Veículo">Manutenção Veículo</option>
+                        <option value="Despachante">Despachante</option>
+                        <option value="Pagamento Recebido">Pagamento Recebido</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Status:</label>
+                    <select class="filter-input" id="filtroStatus">
+                        <option value="">Todos</option>
+                        <option value="Pendente">🔴 Pendente</option>
+                        <option value="Pago">✅ Pago</option>
+                        <option value="Em Quitação">🟡 Em Quitação</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Tipo:</label>
+                    <select class="filter-input" id="filtroTipo">
+                        <option value="">Todos</option>
+                        <option value="entrada">Entradas</option>
+                        <option value="saida">Saídas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Data Início:</label>
+                    <input type="date" class="filter-input" id="filtroDataInicio">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Data Fim:</label>
+                    <input type="date" class="filter-input" id="filtroDataFim">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Valor Mínimo:</label>
+                    <input type="number" step="0.01" class="filter-input" id="filtroValorMin" placeholder="0.00">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Buscar:</label>
+                    <input type="text" class="filter-input" id="filtroBusca" placeholder="Descrição...">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    🔍 Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="limparFiltros()">
+                    🧹 Limpar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabela de Transações -->
+        <div class="transactions-section">
+            <div class="transactions-header">
+                <div class="transactions-title">
+                    📋 Detalhamento das Transações
+                </div>
+                <button class="btn export-btn" onclick="exportarCSV()">
+                    📥 Exportar CSV
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Devedor → Credor</th>
+                            <th>Status</th>
+                            <th>Vencimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div>⏳ Carregando dados financeiros...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="extratos.js"></script>
+    <script src="dados-exemplo.js"></script>
+    <script>
+        // Gerenciamento de usuários da família
+        const familiaMembers = {
+            'sueli': {
+                nome: 'Sueli Menezes Rosa',
+                senha: 'sueli2024',
+                role: 'administrador'
+            },
+            'renato': {
+                nome: 'Renato Avila Barros', 
+                senha: 'renato2024',
+                role: 'membro'
+            },
+            'guilherme': {
+                nome: 'Guilherme Rosa Avila Barros',
+                senha: 'guilherme2024', 
+                role: 'membro'
+            },
+            'lara': {
+                nome: 'Lara Rosa Avila Barros',
+                senha: 'lara2024',
+                role: 'membro'
+            }
+        };
+
+        // Verificar autenticação
+        function verificarAutenticacao() {
+            const usuarioAtual = sessionStorage.getItem('usuarioFamilia');
+            if (!usuarioAtual) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            const dadosUsuario = JSON.parse(usuarioAtual);
+            document.getElementById('userName').textContent = dadosUsuario.nome;
+            document.getElementById('accessTime').textContent = new Date().toLocaleString('pt-BR');
+            
+            return true;
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.removeItem('usuarioFamilia');
+            window.location.href = 'login.html';
+        }
+
+        // Variáveis globais
+        let extratosManager;
+        let dadosCarregados = [];
+        let dadosFiltrados = [];
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!verificarAutenticacao()) return;
+            
+            // Inicializar manager
+            extratosManager = new ExtratosManager();
+            
+            // Carregar dados automaticamente
+            carregarDadosAcertos();
+        });
+
+        // Carregar dados de acertos da família
+        function carregarDadosAcertos() {
+            try {
+                // Carregar dados reais das dívidas
+                const dados = carregarDadosAcertos();
+                
+                if (dados && dados.length > 0) {
+                    dadosCarregados = dados;
+                    dadosFiltrados = [...dadosCarregados];
+                    
+                    atualizarEstatisticas();
+                    renderizarTabela();
+                    
+                    console.log('Dados carregados:', dadosCarregados.length, 'registros');
+                } else {
+                    mostrarMensagemSemDados();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                mostrarMensagemErro();
+            }
+        }
+
+        // Adicionar nova transação
+        function adicionarTransacao() {
+            const tipo = document.getElementById('novoTipo').value;
+            const valor = parseFloat(document.getElementById('novoValor').value);
+            const descricao = document.getElementById('novaDescricao').value.trim();
+            const devedor = document.getElementById('novoDevedor').value.trim();
+            const credor = document.getElementById('novoCredor').value.trim();
+            const vencimento = document.getElementById('novoVencimento').value;
+            const categoria = document.getElementById('novaCategoria').value;
+            const comprovanteFile = document.getElementById('novoComprovante').files[0];
+
+            // Validações
+            if (!valor || valor <= 0) {
+                alert('Por favor, insira um valor válido maior que zero.');
+                return;
+            }
+            if (!descricao) {
+                alert('Por favor, insira uma descrição.');
+                return;
+            }
+            if (!devedor || !credor) {
+                alert('Por favor, informe o devedor e o credor.');
+                return;
+            }
+
+            // Processar arquivo se enviado
+            let nomeComprovante = '';
+            if (comprovanteFile) {
+                nomeComprovante = comprovanteFile.name;
+                analisarComprovante(comprovanteFile);
+            }
+
+            // Criar nova transação
+            const novaTransacao = {
+                id: 'nova_' + Date.now(),
+                data: new Date().toISOString().split('T')[0],
+                banco: tipo === 'divida' ? 'Dívida Familiar' : 'Pagamento',
+                descricao: descricao,
+                valor: tipo === 'divida' ? -Math.abs(valor) : Math.abs(valor),
+                categoria: categoria,
+                devedor: devedor,
+                credor: credor,
+                status: tipo === 'divida' ? 'Pendente' : 'Pago',
+                observacao: `Adicionado em ${new Date().toLocaleString('pt-BR')}`,
+                vencimento: vencimento || new Date().toISOString().split('T')[0],
+                comprovante: nomeComprovante
+            };
+
+            // Adicionar aos dados
+            dadosCarregados.unshift(novaTransacao);
+            dadosFiltrados = [...dadosCarregados];
+
+            // Atualizar interface
+            atualizarEstatisticas();
+            renderizarTabela();
+            limparFormulario();
+
+            alert(`${tipo === 'divida' ? 'Dívida' : 'Recebimento'} adicionado com sucesso!`);
+        }
+
+        // Analisar comprovante enviado
+        function analisarComprovante(arquivo) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // Análise básica do arquivo
+                    const tipoArquivo = arquivo.type;
+                    const tamanho = arquivo.size;
+                    
+                    console.log('Comprovante analisado:', {
+                        nome: arquivo.name,
+                        tipo: tipoArquivo,
+                        tamanho: `${(tamanho / 1024).toFixed(2)} KB`
+                    });
+
+                    // Se for imagem, poderia implementar OCR aqui
+                    if (tipoArquivo.startsWith('image/')) {
+                        console.log('Imagem detectada - implementar OCR futuramente');
+                    }
+                    
+                    // Se for PDF, poderia extrair texto aqui
+                    if (tipoArquivo === 'application/pdf') {
+                        console.log('PDF detectado - implementar extração de texto futuramente');
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao analisar comprovante:', error);
+                }
+            };
+            reader.readAsDataURL(arquivo);
+        }
+
+        // Limpar formulário
+        function limparFormulario() {
+            document.getElementById('novoTipo').value = 'divida';
+            document.getElementById('novoValor').value = '';
+            document.getElementById('novaDescricao').value = '';
+            document.getElementById('novoDevedor').value = '';
+            document.getElementById('novoCredor').value = '';
+            document.getElementById('novoVencimento').value = '';
+            document.getElementById('novaCategoria').value = 'Empréstimo Familiar';
+            document.getElementById('novoComprovante').value = '';
+        }
+
+        // Marcar como pago
+        function marcarComoPago(id) {
+            const transacao = dadosCarregados.find(t => t.id === id);
+            if (transacao) {
+                transacao.status = 'Pago';
+                transacao.observacao += ` | Marcado como pago em ${new Date().toLocaleString('pt-BR')}`;
+                
+                dadosFiltrados = [...dadosCarregados];
+                atualizarEstatisticas();
+                renderizarTabela();
+                
+                alert('Transação marcada como paga!');
+            }
+        }
+
+        // Editar transação
+        function editarTransacao(id) {
+            const transacao = dadosCarregados.find(t => t.id === id);
+            if (transacao) {
+                const novaDescricao = prompt('Nova descrição:', transacao.descricao);
+                if (novaDescricao && novaDescricao.trim()) {
+                    transacao.descricao = novaDescricao.trim();
+                    transacao.observacao += ` | Editado em ${new Date().toLocaleString('pt-BR')}`;
+                    
+                    dadosFiltrados = [...dadosCarregados];
+                    renderizarTabela();
+                    
+                    alert('Transação editada com sucesso!');
+                }
+            }
+        }
+
+        // Remover transação
+        function removerTransacao(id) {
+            if (confirm('Tem certeza que deseja remover esta transação?')) {
+                const index = dadosCarregados.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    dadosCarregados.splice(index, 1);
+                    dadosFiltrados = [...dadosCarregados];
+                    atualizarEstatisticas();
+                    renderizarTabela();
+                    
+                    alert('Transação removida com sucesso!');
+                }
+            }
+        }
+
+        // Atualizar estatísticas
+        function atualizarEstatisticas() {
+            const stats = extratosManager.calcularEstatisticas(dadosFiltrados);
+            
+            document.getElementById('totalEntradas').textContent = 
+                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+                    .format(stats.totalEntradas);
+                    
+            document.getElementById('totalSaidas').textContent = 
+                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+                    .format(Math.abs(stats.totalSaidas));
+                    
+            document.getElementById('saldoLiquido').textContent = 
+                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+                    .format(stats.saldoLiquido);
+                    
+            document.getElementById('totalTransacoes').textContent = stats.totalTransacoes;
+        }
+
+        // Renderizar tabela
+        function renderizarTabela() {
+            const tbody = document.getElementById('transactionsTableBody');
+            
+            if (dadosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <div class="no-data-icon">📊</div>
+                            <div>Nenhuma transação encontrada com os filtros aplicados</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = dadosFiltrados.map(transacao => {
+                const valor = parseFloat(transacao.valor);
+                const valorClass = valor >= 0 ? 'valor-positivo' : 'valor-negativo';
+                const statusIcon = transacao.status === 'Pago' ? '✅' : transacao.status === 'Pendente' ? '🔴' : '🟡';
+                const tipoIcon = valor >= 0 ? '💰' : '💸';
+                
+                // Data de vencimento com destaque se vencida
+                const hoje = new Date();
+                const vencimento = new Date(transacao.vencimento);
+                const vencido = vencimento < hoje && transacao.status === 'Pendente';
+                const vencimentoClass = vencido ? 'style="color: #e53e3e; font-weight: bold;"' : '';
+
+                return `
+                    <tr>
+                        <td>${new Date(transacao.data).toLocaleDateString('pt-BR')}</td>
+                        <td>${tipoIcon} ${valor >= 0 ? 'Recebimento' : 'Dívida'}</td>
+                        <td>${transacao.descricao}
+                            ${transacao.comprovante ? `<br><small>📎 ${transacao.comprovante}</small>` : ''}
+                        </td>
+                        <td class="${valorClass}">
+                            ${new Intl.NumberFormat('pt-BR', { 
+                                style: 'currency', 
+                                currency: 'BRL' 
+                            }).format(Math.abs(valor))}
+                        </td>
+                        <td>
+                            <strong>${transacao.devedor}</strong> → <strong>${transacao.credor}</strong>
+                            <br><small style="color: #666;">${transacao.categoria}</small>
+                        </td>
+                        <td>${statusIcon} ${transacao.status}</td>
+                        <td ${vencimentoClass}>
+                            ${new Date(transacao.vencimento).toLocaleDateString('pt-BR')}
+                            ${vencido ? '<br><small style="color: #e53e3e;">⚠️ VENCIDO</small>' : ''}
+                        </td>
+                        <td>
+                            ${transacao.status === 'Pendente' ? 
+                                `<button onclick="marcarComoPago('${transacao.id}')" style="background: #48bb78; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px;">✅ Pagar</button>` : 
+                                ''
+                            }
+                            <button onclick="editarTransacao('${transacao.id}')" style="background: #4299e1; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px;">✏️ Editar</button>
+                            <button onclick="removerTransacao('${transacao.id}')" style="background: #e53e3e; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px;">🗑️ Remover</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const filtros = {
+                banco: document.getElementById('filtroBank').value,
+                categoria: document.getElementById('filtroCategoria').value,
+                status: document.getElementById('filtroStatus').value,
+                tipo: document.getElementById('filtroTipo').value,
+                dataInicio: document.getElementById('filtroDataInicio').value,
+                dataFim: document.getElementById('filtroDataFim').value,
+                valorMinimo: parseFloat(document.getElementById('filtroValorMin').value) || 0,
+                busca: document.getElementById('filtroBusca').value.toLowerCase().trim()
+            };
+
+            dadosFiltrados = dadosCarregados.filter(transacao => {
+                // Filtro por banco/tipo
+                if (filtros.banco && !transacao.banco.toLowerCase().includes(filtros.banco.toLowerCase())) {
+                    return false;
+                }
+                
+                // Filtro por categoria
+                if (filtros.categoria && transacao.categoria !== filtros.categoria) {
+                    return false;
+                }
+                
+                // Filtro por status
+                if (filtros.status && transacao.status !== filtros.status) {
+                    return false;
+                }
+                
+                // Filtro por tipo (entrada/saída)
+                if (filtros.tipo) {
+                    const isEntrada = parseFloat(transacao.valor) >= 0;
+                    if (filtros.tipo === 'entrada' && !isEntrada) return false;
+                    if (filtros.tipo === 'saida' && isEntrada) return false;
+                }
+                
+                // Filtro por data
+                if (filtros.dataInicio) {
+                    const dataTransacao = new Date(transacao.data);
+                    const dataInicio = new Date(filtros.dataInicio);
+                    if (dataTransacao < dataInicio) return false;
+                }
+                
+                if (filtros.dataFim) {
+                    const dataTransacao = new Date(transacao.data);
+                    const dataFim = new Date(filtros.dataFim);
+                    if (dataTransacao > dataFim) return false;
+                }
+                
+                // Filtro por valor mínimo
+                if (filtros.valorMinimo > 0) {
+                    if (Math.abs(parseFloat(transacao.valor)) < filtros.valorMinimo) return false;
+                }
+                
+                // Filtro por busca
+                if (filtros.busca) {
+                    const textos = [
+                        transacao.descricao,
+                        transacao.devedor,
+                        transacao.credor,
+                        transacao.observacao || ''
+                    ].join(' ').toLowerCase();
+                    
+                    if (!textos.includes(filtros.busca)) return false;
+                }
+                
+                return true;
+            });
+            
+            atualizarEstatisticas();
+            renderizarTabela();
+        }
+
+        // Limpar filtros
+        function limparFiltros() {
+            document.getElementById('filtroBank').value = '';
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('filtroStatus').value = '';
+            document.getElementById('filtroTipo').value = '';
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            document.getElementById('filtroValorMin').value = '';
+            document.getElementById('filtroBusca').value = '';
+            
+            dadosFiltrados = [...dadosCarregados];
+            atualizarEstatisticas();
+            renderizarTabela();
+        }
+
+        // Exportar CSV
+        function exportarCSV() {
+            if (dadosFiltrados.length === 0) {
+                alert('Não há dados para exportar!');
+                return;
+            }
+
+            const usuarioAtual = JSON.parse(sessionStorage.getItem('usuarioFamilia'));
+            const nomeArquivo = `acertos-familia-${usuarioAtual.nome.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
+            
+            extratosManager.exportarCSV(dadosFiltrados, nomeArquivo);
+        }
+
+        // Mostrar mensagem de sem dados
+        function mostrarMensagemSemDados() {
+            document.getElementById('transactionsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="no-data">
+                        <div class="no-data-icon">💰</div>
+                        <div>Nenhum dado financeiro disponível</div>
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            Os dados serão carregados automaticamente quando disponíveis
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Mostrar mensagem de erro
+        function mostrarMensagemErro() {
+            document.getElementById('transactionsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="no-data">
+                        <div class="no-data-icon">⚠️</div>
+                        <div>Erro ao carregar dados financeiros</div>
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            Tente recarregar a página ou entre em contato com o administrador
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Adicionar listeners para filtros em tempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtroInputs = [
+                'filtroBank', 'filtroCategoria', 'filtroTipo', 
+                'filtroDataInicio', 'filtroDataFim', 'filtroValorMin', 'filtroBusca'
+            ];
+            
+            filtroInputs.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    elemento.addEventListener('change', aplicarFiltros);
+                    if (elemento.type === 'text' || elemento.type === 'number') {
+                        elemento.addEventListener('input', aplicarFiltros);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

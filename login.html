@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Ávila Transportes | Acertos Família</title>
+    <meta name="description" content="Acesso restrito aos membros da família para controle de acertos financeiros">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f7fafc;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #f7fafc;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .members-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .members-title {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .member-item {
+            color: #718096;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #5a67d8;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .login-title {
+                font-size: 24px;
+            }
+            
+            .logo {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">👨‍👩‍👧‍👦</div>
+        <h1 class="login-title">Acesso Familiar</h1>
+        <p class="login-subtitle">Sistema de Acertos Rosa Avila Barros</p>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label" for="membro">Membro da Família:</label>
+                <select class="form-select" id="membro" required>
+                    <option value="">Selecione seu nome</option>
+                    <option value="sueli">Sueli Menezes Rosa</option>
+                    <option value="renato">Renato Avila Barros</option>
+                    <option value="guilherme">Guilherme Rosa Avila Barros</option>
+                    <option value="lara">Lara Rosa Avila Barros</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="senha">Senha de Acesso:</label>
+                <input type="password" class="form-input" id="senha" required placeholder="Digite sua senha de acesso">
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                🔐 Entrar no Sistema
+            </button>
+        </form>
+
+        <div class="members-info">
+            <div class="members-title">👥 Membros Autorizados:</div>
+            <div class="member-item">👩 Sueli Menezes Rosa</div>
+            <div class="member-item">👨 Renato Avila Barros</div>
+            <div class="member-item">👦 Guilherme Rosa Avila Barros</div>
+            <div class="member-item">👧 Lara Rosa Avila Barros</div>
+        </div>
+
+        <a href="index.html" class="back-link">← Voltar à página inicial</a>
+    </div>
+
+    <script>
+        // Dados dos membros da família
+        const familiaMembers = {
+            'sueli': {
+                nome: 'Sueli Menezes Rosa',
+                senha: 'senhadasueli',
+                role: 'administrador'
+            },
+            'renato': {
+                nome: 'Renato Avila Barros', 
+                senha: 'senhadorenato',
+                role: 'membro'
+            },
+            'guilherme': {
+                nome: 'Guilherme Rosa Avila Barros',
+                senha: 'senhadoguilherme',
+                role: 'membro'
+            },
+            'lara': {
+                nome: 'Lara Rosa Avila Barros',
+                senha: 'senhadalara',
+                role: 'membro'
+            }
+        };
+
+        // Verificar se já está logado
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioAtual = sessionStorage.getItem('usuarioFamilia');
+            if (usuarioAtual) {
+                window.location.href = 'acertos.html';
+            }
+        });
+
+        // Processar login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const membro = document.getElementById('membro').value;
+            const senha = document.getElementById('senha').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Limpar erro anterior
+            errorDiv.style.display = 'none';
+            
+            if (!membro || !senha) {
+                mostrarErro('Por favor, selecione um membro e digite a senha.');
+                return;
+            }
+            
+            // Verificar credenciais
+            const dadosMembro = familiaMembers[membro];
+            if (!dadosMembro || dadosMembro.senha !== senha) {
+                mostrarErro('Membro ou senha incorretos. Verifique seus dados.');
+                return;
+            }
+            
+            // Login bem-sucedido
+            loginBtn.disabled = true;
+            loginBtn.textContent = '✅ Entrando...';
+            
+            // Salvar dados do usuário
+            const dadosUsuario = {
+                id: membro,
+                nome: dadosMembro.nome,
+                role: dadosMembro.role,
+                loginTime: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('usuarioFamilia', JSON.stringify(dadosUsuario));
+            
+            // Redirecionar após pequeno delay
+            setTimeout(() => {
+                window.location.href = 'acertos.html';
+            }, 1000);
+        });
+
+        // Mostrar mensagem de erro
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+            
+            // Remover erro após 5 segundos
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Auto-preencher senha quando selecionar membro (apenas para demonstração)
+        document.getElementById('membro').addEventListener('change', function() {
+            const membro = this.value;
+            const senhaInput = document.getElementById('senha');
+            
+            if (membro && familiaMembers[membro]) {
+                // Em produção, NUNCA faça isso! Apenas para demonstração da família
+                senhaInput.placeholder = `Digite a senha de ${familiaMembers[membro].nome}`;
+            }
+        });
+
+        // Permitir Enter para fazer login
+        document.getElementById('senha').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
