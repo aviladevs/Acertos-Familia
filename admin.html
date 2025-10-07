@@ -508,6 +508,13 @@
                                 <label for="dataFim" class="inter-label">Data fim</label>
                                 <input type="date" id="dataFim" class="form-input inter-input" />
                             </div>
+                            <div>
+                                <label for="usarMockExtrato" class="inter-label">Teste sem API</label>
+                                <div>
+                                    <input type="checkbox" id="usarMockExtrato" aria-label="Usar dados de mock do extrato" />
+                                    <span class="stat-label">usar mock</span>
+                                </div>
+                            </div>
                             <button class="btn" id="btnImportarInter">Importar do Inter</button>
                         </div>
                         <div class="inter-hint">O backend deve estar rodando em http://127.0.0.1:8000</div>
@@ -1150,9 +1157,15 @@
                 mostrarNotificacao('Consultando extrato no backend...');
                 mostrarProgresso(10);
 
-                const url = `http://127.0.0.1:8000/inter/extrato?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`;
+                const usarMock = document.getElementById('usarMockExtrato')?.checked;
+                const url = usarMock
+                    ? `http://127.0.0.1:8000/inter/extrato_mock?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
+                    : `http://127.0.0.1:8000/inter/extrato?data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}`;
                 const resp = await fetch(url);
-                if (!resp.ok) throw new Error('Falha ao consultar backend');
+                if (!resp.ok) {
+                    const txt = await resp.text();
+                    throw new Error(`Falha ao consultar backend (${resp.status}): ${txt}`);
+                }
 
                 let data;
                 try {

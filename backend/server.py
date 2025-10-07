@@ -55,10 +55,39 @@ def inter_saldo():
 
 
 @app.get("/inter/extrato")
-def inter_extrato(data_inicio: str = Query(...), data_fim: str = Query(...)):
+def inter_extrato(
+    data_inicio: str = Query(None),
+    data_fim: str = Query(None),
+    inicio: str = Query(None),
+    fim: str = Query(None),
+):
     try:
+        # Suporta aliases de parâmetros
+        data_inicio = data_inicio or inicio
+        data_fim = data_fim or fim
+        if not data_inicio or not data_fim:
+            raise HTTPException(status_code=422, detail="Parâmetros obrigatórios: data_inicio/data_fim (ou inicio/fim)")
         client = InterAPIClient(InterAPIConfig.from_env())
         return client.obter_extrato(data_inicio, data_fim)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/inter/extrato_mock")
+def inter_extrato_mock(inicio: str = Query(...), fim: str = Query(...)):
+    # Mock simples para testes de ponta a ponta sem mTLS
+    try:
+        items = [
+            {"data": "2025-09-01", "descricao": "Pix Recebido: ACME LTDA 12.345.678/0001-99", "valor": 1250.55, "tipo": "C"},
+            {"data": "2025-09-02", "descricao": "Transferência Enviada: SUPERMERCADO XYZ 34.567.890/0001-12", "valor": 230.70, "tipo": "D"},
+            {"data": "2025-09-03", "descricao": "Pix Recebido: JOSE DA SILVA 123.456.789-00", "valor": 320.00, "tipo": "C"},
+            {"data": "2025-09-04", "descricao": "Pagamento Boleto: CONDOMINIO SOLAR 11.222.333/0001-44", "valor": 650.00, "tipo": "D"},
+            {"data": "2025-09-05", "descricao": "Pix Recebido: BETA SERVICOS LTDA 98.765.432/0001-10", "valor": 2100.00, "tipo": "C"},
+            {"data": "2025-09-06", "descricao": "Transferência Enviada: FARMACIA SAUDE 22.333.444/0001-55", "valor": 89.90, "tipo": "D"},
+            {"data": "2025-09-07", "descricao": "Pix Recebido: NUBANK PAGAMENTOS S.A. 18.236.120/0001-58", "valor": 415.35, "tipo": "C"},
+            {"data": "2025-09-08", "descricao": "TED Enviada: POSTO PETRO 44.555.666/0001-77", "valor": 150.00, "tipo": "D"},
+        ]
+        return {"items": items, "inicio": inicio, "fim": fim, "fonte": "mock"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
