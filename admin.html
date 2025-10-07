@@ -282,18 +282,23 @@
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.04);
+            max-height: 500px;
+            overflow-y: auto;
         }
         .table {
             width: 100%;
             border-collapse: collapse;
         }
         .table th {
-            background: #f8f9fa;
+            background: #007aff;
+            color: white;
             padding: 16px;
             text-align: left;
             font-weight: 600;
-            color: #1d1d1f;
             border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .table td {
             padding: 16px;
@@ -322,6 +327,11 @@
             background: #f0fff0;
             color: #30d158;
         }
+        
+        .valor-positivo { color: #28a745; font-weight: bold; }
+        .valor-negativo { color: #dc3545; font-weight: bold; }
+        .empresa { font-weight: 600; color: #007aff; }
+        .cnpj { font-family: monospace; background: #e3f2fd; padding: 2px 4px; border-radius: 3px; }
         
         .cliente-card {
             background: white;
@@ -410,6 +420,21 @@
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
         }
         
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #007aff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
         @media (max-width: 768px) {
             .container { padding: 20px 16px; }
             .card { padding: 20px; }
@@ -434,6 +459,7 @@
         <button class="nav-tab active" data-tab="upload"> Upload & Importação</button>
         <button class="nav-tab" data-tab="cadastros"> Cadastros</button>
         <button class="nav-tab" data-tab="clientes"> Clientes & Transações</button>
+        <button class="nav-tab" data-tab="analise"> Análise Detalhada</button>
     </div>
     
     <div class="container">
@@ -452,6 +478,9 @@
                         <h4>Arquivos Selecionados:</h4>
                         <div id="filesContainer"></div>
                     </div>
+                    <div class="progress-bar" id="progressBar" style="display: none;">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
                     <button class="btn" id="processBtn" disabled>Processar Arquivos</button>
                     <button class="btn secondary" id="clearBtn">Limpar Dados</button>
                 </div>
@@ -469,6 +498,10 @@
                 <div class="stat-card">
                     <div class="stat-value" id="totalValor">R$ 0,00</div>
                     <div class="stat-label">Valor Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEmpresas">0</div>
+                    <div class="stat-label">Empresas Identificadas</div>
                 </div>
             </div>
         </div>
@@ -521,12 +554,13 @@
                                 <th>Documento</th>
                                 <th>Tipo</th>
                                 <th>Contato</th>
+                                <th>Transações</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="cadastrosTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #86868b; padding: 40px;">
+                                <td colspan="6" style="text-align: center; color: #86868b; padding: 40px;">
                                     Nenhum cadastro encontrado
                                 </td>
                             </tr>
@@ -548,6 +582,18 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Aba Análise Detalhada -->
+        <div id="analise" class="tab-content">
+            <div class="card">
+                <h2> Análise Detalhada dos Extratos</h2>
+                <div id="analiseResults">
+                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                        Importe arquivos para ver a análise detalhada
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="notification" id="notification"></div>
@@ -557,6 +603,8 @@
         let arquivosCarregados = [];
         let cadastrosDetectados = [];
         let transacoesPorCliente = new Map();
+        let todasTransacoes = [];
+        let clientesMap = new Map();
         
         // Aguardar DOM carregado
         document.addEventListener("DOMContentLoaded", function() {
@@ -566,7 +614,6 @@
         
         function inicializarSistema() {
             try {
-                // Verificar se está logado como admin (simplificado para teste)
                 const userNameElement = document.getElementById("userName");
                 if (userNameElement) {
                     userNameElement.textContent = "Admin";
@@ -704,6 +751,8 @@
             // Recarregar dados se necessário
             if (tabName === 'clientes') {
                 carregarTransacoesPorCliente();
+            } else if (tabName === 'analise') {
+                renderizarAnaliseDetalhada();
             }
         }
         
@@ -723,7 +772,7 @@
                     uploadArea.innerHTML = `
                         <div class="upload-icon"></div>
                         <div class="upload-text">${files.length} arquivo(s) selecionado(s)</div>
-                        <div class="upload-hint">Clique para selecionar outros arquivos</div>
+                        <div class="upload-hint">Clique para processar ou selecionar outros arquivos</div>
                     `;
                 }
                 
@@ -780,12 +829,15 @@
                 }
                 
                 mostrarNotificacao("Processando arquivos...");
+                mostrarProgresso(0);
                 
                 const novosCadastros = [];
                 const novasTransacoes = [];
                 
-                for (let file of arquivosCarregados) {
+                for (let i = 0; i < arquivosCarregados.length; i++) {
+                    const file = arquivosCarregados[i];
                     console.log("Processando arquivo:", file.name);
+                    
                     const content = await lerArquivo(file);
                     
                     if (file.name.toLowerCase().endsWith(".csv")) {
@@ -793,20 +845,46 @@
                     } else if (file.name.toLowerCase().endsWith(".ofx")) {
                         processarOFX(content, file.name, novosCadastros, novasTransacoes);
                     }
+                    
+                    const progress = ((i + 1) / arquivosCarregados.length) * 100;
+                    mostrarProgresso(progress);
                 }
                 
                 console.log("Cadastros encontrados:", novosCadastros.length);
                 console.log("Transações encontradas:", novasTransacoes.length);
                 
-                // Simular salvamento (sem IndexedDB por enquanto)
+                // Simular salvamento
                 cadastrosDetectados.push(...novosCadastros);
+                todasTransacoes.push(...novasTransacoes);
+                
+                // Processar para análise
+                processarParaAnalise(novasTransacoes);
                 
                 carregarDadosExistentes();
-                mostrarNotificacao(`Processados: ${novosCadastros.length} cadastros, ${novasTransacoes.length} transações!`);
+                ocultarProgresso();
+                mostrarNotificacao(` Processados: ${novosCadastros.length} cadastros, ${novasTransacoes.length} transações!`);
                 
             } catch (error) {
                 console.error("Erro ao processar:", error);
+                ocultarProgresso();
                 mostrarNotificacao("Erro ao processar arquivos: " + error.message, "error");
+            }
+        }
+        
+        function mostrarProgresso(percentage) {
+            const progressBar = document.getElementById("progressBar");
+            const progressFill = document.getElementById("progressFill");
+            
+            if (progressBar && progressFill) {
+                progressBar.style.display = "block";
+                progressFill.style.width = percentage + "%";
+            }
+        }
+        
+        function ocultarProgresso() {
+            const progressBar = document.getElementById("progressBar");
+            if (progressBar) {
+                progressBar.style.display = "none";
             }
         }
         
@@ -846,15 +924,16 @@
                     
                     const clienteInfo = detectarEVincularCadastro(descricao, nomeArquivo, "Inter", cadastros);
                     
-                    if (clienteInfo) {
+                    if (clienteInfo || descricao.trim()) {
                         transacoes.push({
+                            id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                             data: data,
                             descricao: descricao,
                             valor: valor,
                             banco: "Inter",
                             arquivo: nomeArquivo,
-                            clienteDocumento: clienteInfo.documento,
-                            clienteNome: clienteInfo.nome
+                            clienteDocumento: clienteInfo?.documento || null,
+                            clienteNome: clienteInfo?.nome || limparNomeEmpresa(descricao)
                         });
                     }
                 }
@@ -875,15 +954,16 @@
                     
                     const clienteInfo = detectarEVincularCadastro(descricao, nomeArquivo, "Nubank", cadastros);
                     
-                    if (clienteInfo) {
+                    if (clienteInfo || descricao.trim()) {
                         transacoes.push({
+                            id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                             data: data,
                             descricao: descricao,
                             valor: valor,
                             banco: "Nubank",
                             arquivo: nomeArquivo,
-                            clienteDocumento: clienteInfo.documento,
-                            clienteNome: clienteInfo.nome
+                            clienteDocumento: clienteInfo?.documento || null,
+                            clienteNome: clienteInfo?.nome || limparNomeEmpresa(descricao)
                         });
                     }
                 }
@@ -910,15 +990,8 @@
                         return existente;
                     }
                     
-                    // Limpar nome
-                    let nome = descricao
-                        .replace(documento, "")
-                        .replace(/[^a-zA-Z\\s]/g, "")
-                        .trim();
-                    
-                    if (nome.length < 3) {
-                        nome = `${tipo} ${documento}`;
-                    }
+                    // Limpar nome usando a função avançada
+                    const nome = limparNomeEmpresa(descricao, documento);
                     
                     const novoCadastro = {
                         nome,
@@ -941,6 +1014,92 @@
                 console.error("Erro ao detectar cadastro:", error);
                 return null;
             }
+        }
+        
+        // Função avançada de limpeza de nomes (da analise-extratos.html)
+        function limparNomeEmpresa(texto, documento) {
+            let nome = texto
+                // Remove prefixos comuns
+                .replace(/Pix (recebido|enviado):/gi, '')
+                .replace(/Transferencia (recebida|enviada):/gi, '')
+                .replace(/Transferência (recebida|enviada) pelo Pix\\s*-?/gi, '')
+                .replace(/Transferência Recebida\\s*-?/gi, '')
+                .replace(/Cp\\s*:\\s*\\d+\\s*-?/gi, '')
+                .replace(/^\\d+\\s+\\d+\\s+\\d+\\s+/gi, '') // Remove códigos iniciais como "341 9 147786"
+                .replace(/^\\d+\\s+/gi, '') // Remove números iniciais
+                .replace(/"/g, '') // Remove aspas
+                .trim();
+
+            // Remove o documento do texto se encontrado
+            if (documento) {
+                // Remove documento com formatação
+                nome = nome.replace(new RegExp(documento.replace(/[.\\/\\-]/g, '\\\\$&'), 'gi'), '');
+                // Remove documento sem formatação
+                const documentoNumeros = documento.replace(/[^\\d]/g, '');
+                nome = nome.replace(new RegExp(documentoNumeros, 'gi'), '');
+                // Remove traços isolados que sobraram
+                nome = nome.replace(/\\s*-\\s*$/, '').replace(/^\\s*-\\s*/, '');
+            }
+
+            // Remove datas no formato DD/MM/AAAA
+            nome = nome.replace(/\\d{2}\\/\\d{2}\\/\\d{4}/g, '');
+            
+            // Remove CPF mascarado
+            nome = nome.replace(/{3}\\.\\d{3}\\.\\d{3}-{2}/g, '');
+            
+            // Remove números de CPF completos
+            nome = nome.replace(/\\d{11}/g, '');
+            
+            // Remove informações bancárias
+            nome = nome.replace(/\\s*-\\s*[A-Z\\s]+(SCFI|S\\.?A\\.?|LTDA|ME|EPP)?\\s*\\(\\d+\\)\\s*Agência:\\s*\\d+\\s*Conta:\\s*[\\d\\-]+/gi, '');
+            
+            // Remove espaços múltiplos e trim
+            nome = nome.replace(/\\s+/g, ' ').trim();
+            
+            // Remove hífen no final ou início
+            nome = nome.replace(/^-\\s*/, '').replace(/\\s*-$/, '');
+            
+            // Capitaliza o nome corretamente
+            if (nome.length > 2) {
+                nome = nome.toLowerCase().split(' ')
+                    .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+                    .join(' ');
+            }
+
+            return nome || 'Nome não identificado';
+        }
+        
+        function processarParaAnalise(transacoes) {
+            clientesMap.clear();
+            
+            transacoes.forEach(transacao => {
+                const documento = transacao.clienteDocumento || 'sem-documento';
+                const nomeEmpresa = transacao.clienteNome || 'Nome não identificado';
+                
+                if (documento !== 'sem-documento' && nomeEmpresa !== 'Nome não identificado') {
+                    const key = `${documento}_${nomeEmpresa}`;
+                    if (!clientesMap.has(key)) {
+                        clientesMap.set(key, {
+                            nome: nomeEmpresa,
+                            documento: documento,
+                            transacoes: [],
+                            totalRecebido: 0,
+                            totalEnviado: 0
+                        });
+                    }
+                    
+                    const cliente = clientesMap.get(key);
+                    const valorNum = transacao.valor;
+                    
+                    cliente.transacoes.push(transacao);
+                    
+                    if (valorNum > 0) {
+                        cliente.totalRecebido += valorNum;
+                    } else {
+                        cliente.totalEnviado += Math.abs(valorNum);
+                    }
+                }
+            });
         }
         
         function salvarCadastro(e) {
@@ -1006,7 +1165,7 @@
             if (cadastrosDetectados.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #86868b; padding: 40px;">
+                        <td colspan="6" style="text-align: center; color: #86868b; padding: 40px;">
                             Nenhum cadastro encontrado
                         </td>
                     </tr>
@@ -1014,35 +1173,41 @@
                 return;
             }
             
-            tbody.innerHTML = cadastrosDetectados.map(cadastro => `
-                <tr>
-                    <td>
-                        <div style="font-weight: 600;">${cadastro.nome}</div>
-                        <div style="font-size: 12px; color: #86868b;">${cadastro.observacoes || ''}</div>
-                    </td>
-                    <td>
-                        <span style="font-family: monospace; background: #f8f9fa; padding: 4px 8px; border-radius: 4px;">
-                            ${cadastro.documento}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${cadastro.tipo.toLowerCase()}">${cadastro.tipo}</span>
-                    </td>
-                    <td>
-                        <div>${cadastro.email || '-'}</div>
-                        <div style="font-size: 12px; color: #86868b;">${cadastro.telefone || ''}</div>
-                    </td>
-                    <td>
-                        <button class="btn small danger" onclick="excluirCadastro('${cadastro.documento}')">
-                             Excluir
-                        </button>
-                    </td>
-                </tr>
-            `).join("");
+            tbody.innerHTML = cadastrosDetectados.map(cadastro => {
+                const transacoesCount = todasTransacoes.filter(t => t.clienteDocumento === cadastro.documento).length;
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${cadastro.nome}</div>
+                            <div style="font-size: 12px; color: #86868b;">${cadastro.observacoes || ''}</div>
+                        </td>
+                        <td>
+                            <span style="font-family: monospace; background: #f8f9fa; padding: 4px 8px; border-radius: 4px;">
+                                ${cadastro.documento}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${cadastro.tipo.toLowerCase()}">${cadastro.tipo}</span>
+                        </td>
+                        <td>
+                            <div>${cadastro.email || '-'}</div>
+                            <div style="font-size: 12px; color: #86868b;">${cadastro.telefone || ''}</div>
+                        </td>
+                        <td>
+                            <span class="badge">${transacoesCount} transações</span>
+                        </td>
+                        <td>
+                            <button class="btn small danger" onclick="excluirCadastro('${cadastro.documento}')">
+                                 Excluir
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
         }
         
         function carregarTransacoesPorCliente() {
-            // Placeholder para implementação futura
             renderizarClientes();
         }
         
@@ -1050,11 +1215,146 @@
             const container = document.getElementById("clientesContainer");
             if (!container) return;
             
-            container.innerHTML = `
-                <div style="text-align: center; color: #86868b; padding: 40px;">
-                    Sistema de clientes será carregado após processamento de arquivos
+            if (clientesMap.size === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                        Importe arquivos para ver análise de clientes
+                    </div>
+                `;
+                return;
+            }
+            
+            // Converter Map para Array e ordenar por saldo
+            const clientesArray = Array.from(clientesMap.values())
+                .sort((a, b) => (b.totalRecebido + b.totalEnviado) - (a.totalRecebido + a.totalEnviado));
+            
+            container.innerHTML = clientesArray.map(cliente => {
+                const saldo = cliente.totalRecebido - cliente.totalEnviado;
+                
+                return `
+                    <div class="cliente-card">
+                        <div class="cliente-header">
+                            <div>
+                                <div class="cliente-nome">${cliente.nome}</div>
+                                <div class="cliente-documento">${cliente.documento}</div>
+                            </div>
+                            <span class="badge ${saldo >= 0 ? 'cnpj' : 'cpf'}">
+                                ${saldo >= 0 ? 'Crédito' : 'Débito'}
+                            </span>
+                        </div>
+                        <div class="cliente-stats">
+                            <div class="cliente-stat">
+                                <div class="cliente-stat-value">${cliente.transacoes.length}</div>
+                                <div class="cliente-stat-label">Transações</div>
+                            </div>
+                            <div class="cliente-stat">
+                                <div class="cliente-stat-value">${formatarMoeda(cliente.totalRecebido)}</div>
+                                <div class="cliente-stat-label">Recebido</div>
+                            </div>
+                            <div class="cliente-stat">
+                                <div class="cliente-stat-value">${formatarMoeda(cliente.totalEnviado)}</div>
+                                <div class="cliente-stat-label">Enviado</div>
+                            </div>
+                            <div class="cliente-stat">
+                                <div class="cliente-stat-value" style="color: ${saldo >= 0 ? '#30d158' : '#ff3b30'}">
+                                    ${formatarMoeda(saldo)}
+                                </div>
+                                <div class="cliente-stat-label">Saldo</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+        
+        function renderizarAnaliseDetalhada() {
+            const container = document.getElementById("analiseResults");
+            if (!container) return;
+            
+            if (clientesMap.size === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                        Importe arquivos para ver a análise detalhada
+                    </div>
+                `;
+                return;
+            }
+            
+            let totalTransacoes = 0;
+            let valorTotalMovimentado = 0;
+            
+            const clientes = Array.from(clientesMap.values())
+                .sort((a, b) => (b.totalRecebido + b.totalEnviado) - (a.totalRecebido + a.totalEnviado));
+            
+            clientes.forEach(cliente => {
+                totalTransacoes += cliente.transacoes.length;
+                valorTotalMovimentado += cliente.totalRecebido + cliente.totalEnviado;
+            });
+            
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${clientes.length}</div>
+                        <div class="stat-label">Empresas Identificadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${totalTransacoes}</div>
+                        <div class="stat-label">Total de Transações</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatarMoeda(valorTotalMovimentado)}</div>
+                        <div class="stat-label">Valor Total Movimentado</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2> Resumo por Cliente/CNPJ</h2>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Documento</th>
+                                    <th>Transações</th>
+                                    <th>Total Recebido</th>
+                                    <th>Total Enviado</th>
+                                    <th>Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            clientes.forEach(cliente => {
+                const saldo = cliente.totalRecebido - cliente.totalEnviado;
+                const saldoClass = saldo >= 0 ? 'valor-positivo' : 'valor-negativo';
+                
+                html += `
+                    <tr>
+                        <td class="empresa">${cliente.nome}</td>
+                        <td><span class="cnpj">${cliente.documento}</span></td>
+                        <td>${cliente.transacoes.length}</td>
+                        <td class="valor-positivo">${formatarMoeda(cliente.totalRecebido)}</td>
+                        <td class="valor-negativo">${formatarMoeda(cliente.totalEnviado)}</td>
+                        <td class="${saldoClass}">${formatarMoeda(saldo)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
+            
+            container.innerHTML = html;
+        }
+        
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat("pt-BR", { 
+                style: "currency", 
+                currency: "BRL" 
+            }).format(Math.abs(valor));
         }
         
         function aplicarMascaraDocumento(e) {
@@ -1133,17 +1433,23 @@
                 const totalCadastrosEl = document.getElementById("totalCadastros");
                 const totalTransacoesEl = document.getElementById("totalTransacoes");
                 const totalValorEl = document.getElementById("totalValor");
+                const totalEmpresasEl = document.getElementById("totalEmpresas");
                 
                 if (totalCadastrosEl) {
                     totalCadastrosEl.textContent = cadastrosDetectados.length;
                 }
                 
                 if (totalTransacoesEl) {
-                    totalTransacoesEl.textContent = "0"; // Placeholder
+                    totalTransacoesEl.textContent = todasTransacoes.length;
                 }
                 
+                if (totalEmpresasEl) {
+                    totalEmpresasEl.textContent = clientesMap.size;
+                }
+                
+                const valorTotal = todasTransacoes.reduce((sum, t) => sum + Math.abs(t.valor), 0);
                 if (totalValorEl) {
-                    totalValorEl.textContent = "R$ 0,00"; // Placeholder
+                    totalValorEl.textContent = formatarMoeda(valorTotal);
                 }
             } catch (error) {
                 console.error("Erro ao atualizar estatísticas:", error);
@@ -1154,9 +1460,12 @@
             try {
                 if (confirm("Deseja realmente limpar todos os dados?")) {
                     cadastrosDetectados = [];
+                    todasTransacoes = [];
                     transacoesPorCliente.clear();
+                    clientesMap.clear();
                     renderizarCadastros();
                     renderizarClientes();
+                    renderizarAnaliseDetalhada();
                     atualizarEstatisticas();
                     mostrarNotificacao("Dados limpos com sucesso!");
                 }
