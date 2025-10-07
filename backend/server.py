@@ -4,15 +4,18 @@ from .inter_api_client import InterAPIClient, InterAPIConfig
 from dotenv import load_dotenv
 from .db import Database, DBConfig
 from typing import Optional, Dict, Any
+import os
 
 load_dotenv()
 app = FastAPI(title="Avila Inter API Proxy", version="0.1.0")
 
+# Configurar CORS com domínios específicos
+cors_origins = os.getenv("CORS_ORIGINS", "https://avilatransportes.com.br,http://127.0.0.1:5500").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 

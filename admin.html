@@ -521,10 +521,10 @@
                         <div class="inter-row mt-12">
                             <div class="flex-1">
                                 <label for="backendUrl" class="inter-label">URL do Backend</label>
-                                <input type="url" id="backendUrl" class="form-input w-full" value="http://127.0.0.1:8000" placeholder="https://seu-projeto.up.railway.app" />
+                                <input type="url" id="backendUrl" class="form-input w-full" value="https://api.avilatransportes.com.br" placeholder="https://api.avilatransportes.com.br" />
                             </div>
                         </div>
-                        <div class="inter-hint">Local: http://127.0.0.1:8000 | Railway: https://seu-projeto.up.railway.app</div>
+                        <div class="inter-hint">Local: http://127.0.0.1:8000 | Produção: https://api.avilatransportes.com.br</div>
                     </div>
                 </div>
             </div>
@@ -582,7 +582,17 @@
                         <label for="observacoes">Observações</label>
                         <textarea id="observacoes" class="form-input" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn"> Salvar Cadastro</button>
+                    <div class="form-group">
+                        <label for="contaCorrente">Configurações</label>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                            <input type="checkbox" id="contaCorrente" aria-label="Conta corrente para transações" />
+                            <span class="stat-label">Conta Corrente (pode ser devedor/credor)</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button type="submit" class="btn"> Salvar Cadastro</button>
+                        <button type="button" class="btn secondary" onclick="cancelarEdicao()">Cancelar</button>
+                    </div>
                 </form>
             </div>
             
@@ -597,6 +607,7 @@
                                 <th>Documento</th>
                                 <th>Tipo</th>
                                 <th>Contato</th>
+                                <th>Conta Corrente</th>
                                 <th>Transações</th>
                                 <th>Ações</th>
                             </tr>
@@ -1178,7 +1189,7 @@
                 mostrarNotificacao('Consultando extrato no backend...');
                 mostrarProgresso(10);
 
-                const backendUrl = document.getElementById('backendUrl')?.value?.trim() || 'http://127.0.0.1:8000';
+                const backendUrl = document.getElementById('backendUrl')?.value?.trim() || 'https://api.avilatransportes.com.br';
                 const usarMock = document.getElementById('usarMockExtrato')?.checked;
                 const url = usarMock
                     ? `${backendUrl}/inter/extrato_mock?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
@@ -1294,35 +1305,71 @@
                 const email = document.getElementById("email").value.trim();
                 const telefone = document.getElementById("telefone").value.trim();
                 const observacoes = document.getElementById("observacoes").value.trim();
+                const contaCorrente = document.getElementById("contaCorrente").checked;
                 
                 if (!nome || !tipo || !documento) {
                     mostrarNotificacao("Preencha os campos obrigatórios", "error");
                     return;
                 }
                 
-                // Verificar se já existe
-                const existente = cadastrosDetectados.find(c => c.documento === documento);
-                if (existente) {
-                    mostrarNotificacao("Documento já cadastrado", "error");
-                    return;
+                const botaoSalvar = document.querySelector('#formCadastro button[type="submit"]');
+                const documentoEdicao = botaoSalvar.getAttribute("data-editing");
+                
+                if (documentoEdicao) {
+                    // Modo edição - atualizar cadastro existente
+                    const indice = cadastrosDetectados.findIndex(c => c.documento === documentoEdicao);
+                    if (indice !== -1) {
+                        cadastrosDetectados[indice] = {
+                            ...cadastrosDetectados[indice],
+                            nome,
+                            tipo,
+                            email,
+                            telefone,
+                            observacoes,
+                            contaCorrente
+                        };
+                        
+                        // Atualizar no IndexedDB também
+                        if (typeof db !== 'undefined' && db.atualizarMembro) {
+                            db.atualizarMembro(cadastrosDetectados[indice]).catch(console.error);
+                        }
+                        
+                        mostrarNotificacao("Cadastro atualizado com sucesso!");
+                        cancelarEdicao();
+                    }
+                } else {
+                    // Modo criação - verificar se já existe
+                    const existente = cadastrosDetectados.find(c => c.documento === documento);
+                    if (existente) {
+                        mostrarNotificacao("Documento já cadastrado", "error");
+                        return;
+                    }
+                    
+                    const novoCadastro = {
+                        nome,
+                        documento,
+                        tipo,
+                        email,
+                        telefone,
+                        observacoes,
+                        contaCorrente,
+                        banco: "Manual",
+                        arquivo: "Cadastro Manual",
+                        dataDeteccao: new Date().toISOString()
+                    };
+                    
+                    cadastrosDetectados.push(novoCadastro);
+                    
+                    // Salvar no IndexedDB também
+                    if (typeof db !== 'undefined' && db.salvarMembro) {
+                        db.salvarMembro(novoCadastro).catch(console.error);
+                    }
+                    
+                    document.getElementById("formCadastro").reset();
+                    mostrarNotificacao("Cadastro salvo com sucesso!");
                 }
                 
-                const novoCadastro = {
-                    nome,
-                    documento,
-                    tipo,
-                    email,
-                    telefone,
-                    observacoes,
-                    banco: "Manual",
-                    arquivo: "Cadastro Manual",
-                    dataDeteccao: new Date().toISOString()
-                };
-                
-                cadastrosDetectados.push(novoCadastro);
                 carregarDadosExistentes();
-                document.getElementById("formCadastro").reset();
-                mostrarNotificacao("Cadastro salvo com sucesso!");
                 
             } catch (error) {
                 console.error("Erro ao salvar cadastro:", error);
@@ -1375,12 +1422,20 @@
                             <div class="stat-label">${cadastro.telefone || ''}</div>
                         </td>
                         <td>
+                            <span class="badge ${cadastro.contaCorrente ? 'cnpj' : ''}">${cadastro.contaCorrente ? '✓ Ativa' : '- Inativa'}</span>
+                        </td>
+                        <td>
                             <span class="badge">${transacoesCount} transações</span>
                         </td>
                         <td>
-                            <button class="btn small danger" onclick="excluirCadastro('${cadastro.documento}')">
-                                 Excluir
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn small" onclick="editarCadastro('${cadastro.documento}')">
+                                    📝 Editar
+                                </button>
+                                <button class="btn small danger" onclick="excluirCadastro('${cadastro.documento}')">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1595,6 +1650,53 @@
             });
         }
         
+        function editarCadastro(documento) {
+            const cadastro = cadastrosDetectados.find(c => c.documento === documento);
+            if (!cadastro) {
+                mostrarNotificacao("Cadastro não encontrado", "error");
+                return;
+            }
+            
+            // Preencher o formulário com os dados do cadastro
+            document.getElementById("nomeCliente").value = cadastro.nome;
+            document.getElementById("tipoDocumento").value = cadastro.tipo;
+            document.getElementById("documento").value = cadastro.documento;
+            document.getElementById("email").value = cadastro.email || '';
+            document.getElementById("telefone").value = cadastro.telefone || '';
+            document.getElementById("observacoes").value = cadastro.observacoes || '';
+            document.getElementById("contaCorrente").checked = cadastro.contaCorrente || false;
+            
+            // Desabilitar campo documento para edição
+            document.getElementById("documento").readOnly = true;
+            document.getElementById("documento").style.backgroundColor = "#f5f5f5";
+            
+            // Alterar o botão para "Atualizar"
+            const botaoSalvar = document.querySelector('#formCadastro button[type="submit"]');
+            botaoSalvar.textContent = "Atualizar Cadastro";
+            botaoSalvar.setAttribute("data-editing", documento);
+            
+            // Scroll para o formulário
+            document.getElementById("formCadastro").scrollIntoView({ behavior: 'smooth' });
+            
+            mostrarNotificacao("Modo de edição ativado. Altere os dados e clique em 'Atualizar Cadastro'.", "info");
+        }
+        
+        function cancelarEdicao() {
+            // Limpar formulário
+            document.getElementById("formCadastro").reset();
+            
+            // Reabilitar campo documento
+            document.getElementById("documento").readOnly = false;
+            document.getElementById("documento").style.backgroundColor = "";
+            
+            // Restaurar botão para "Salvar"
+            const botaoSalvar = document.querySelector('#formCadastro button[type="submit"]');
+            botaoSalvar.textContent = "Salvar Cadastro";
+            botaoSalvar.removeAttribute("data-editing");
+            
+            mostrarNotificacao("Edição cancelada", "info");
+        }
+
         function excluirCadastro(documento) {
             if (confirm("Deseja realmente excluir este cadastro?")) {
                 try {
