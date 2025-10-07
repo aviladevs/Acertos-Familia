@@ -969,6 +969,40 @@
                 }
             }
         }
+
+        // Processamento simples de OFX usando regex das tags
+        function processarOFX(content, nomeArquivo, cadastros, transacoes) {
+            console.log("Processando OFX:", nomeArquivo);
+            const itens = content.match(/<STMTTRN>[\s\S]*?<\/STMTTRN>/gi) || [];
+            itens.forEach((bloco) => {
+                const dt = (bloco.match(/<DTPOSTED>([^<]+)/i) || [null, null])[1];
+                const am = (bloco.match(/<TRNAMT>([^<]+)/i) || [null, null])[1];
+                const memoMatch = bloco.match(/<(MEMO|NAME)>([^<]+)/i);
+                const descricao = memoMatch ? memoMatch[2].trim() : "";
+                const data = formatarDataOFX(dt);
+                const valor = am ? parseFloat(am.replace(",", ".")) : NaN;
+                if (!data || isNaN(valor)) return;
+
+                const clienteInfo = detectarEVincularCadastro(descricao, nomeArquivo, "OFX", cadastros);
+                transacoes.push({
+                    id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    data: data,
+                    descricao: descricao,
+                    valor: valor,
+                    banco: "OFX",
+                    arquivo: nomeArquivo,
+                    clienteDocumento: clienteInfo?.documento || null,
+                    clienteNome: clienteInfo?.nome || limparNomeEmpresa(descricao)
+                });
+            });
+        }
+
+        function formatarDataOFX(dt) {
+            if (!dt) return null;
+            const m = /^(\d{4})(\d{2})(\d{2})/.exec(dt);
+            if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+            return null;
+        }
         
         function detectarEVincularCadastro(descricao, arquivo, banco, cadastros) {
             try {
@@ -1045,7 +1079,7 @@
             nome = nome.replace(/\\d{2}\\/\\d{2}\\/\\d{4}/g, '');
             
             // Remove CPF mascarado
-            nome = nome.replace(/{3}\\.\\d{3}\\.\\d{3}-{2}/g, '');
+                nome = nome.replace(/\\b\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}\\b/g, '');
             
             // Remove números de CPF completos
             nome = nome.replace(/\\d{11}/g, '');

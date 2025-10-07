@@ -1,0 +1,22 @@
+# Certificados e segredos
+secrets/
+*.pfx
+*.p12
+*.pem
+*.crt
+*.key
+.env
+
+# SQLite gerado
+clientes.db
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node/dev local
+node_modules/
+.DS_Store
