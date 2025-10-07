@@ -10,14 +10,12 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: #f5f5f7;
             color: #1d1d1f;
             line-height: 1.4;
         }
-
         .header {
             background: #ffffff;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
@@ -29,19 +27,16 @@
             top: 0;
             z-index: 100;
         }
-
         .header h1 {
             font-size: 21px;
             font-weight: 600;
             color: #1d1d1f;
         }
-
         .user-info {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .btn-logout {
             background: #ff3b30;
             color: white;
@@ -53,13 +48,11 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 32px 24px;
         }
-
         .card {
             background: #ffffff;
             border-radius: 18px;
@@ -68,18 +61,15 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid rgba(0, 0, 0, 0.04);
         }
-
         .card h2 {
             font-size: 24px;
             font-weight: 600;
             color: #1d1d1f;
             margin-bottom: 20px;
         }
-
         .upload-section {
             text-align: center;
         }
-
         .upload-area {
             border: 2px dashed #d2d2d7;
             border-radius: 12px;
@@ -90,44 +80,32 @@
             margin-bottom: 20px;
             background: #ffffff;
         }
-
         .upload-area:hover {
             border-color: #007aff;
             background: rgba(0, 122, 255, 0.02);
         }
-
-        .upload-area.dragover {
-            border-color: #007aff;
-            background: rgba(0, 122, 255, 0.05);
-        }
-
         .upload-area.has-files {
             border-color: #30d158;
             background: rgba(48, 209, 88, 0.05);
         }
-
         .file-input {
             display: none;
         }
-
         .upload-icon {
             font-size: 48px;
             margin-bottom: 16px;
             color: #007aff;
         }
-
         .upload-text {
             font-size: 18px;
             font-weight: 600;
             color: #1d1d1f;
             margin-bottom: 8px;
         }
-
         .upload-hint {
             font-size: 14px;
             color: #86868b;
         }
-
         .files-list {
             background: #f0f8ff;
             border: 1px solid #007aff;
@@ -137,13 +115,11 @@
             text-align: left;
             display: none;
         }
-
         .files-list h4 {
             color: #007aff;
             margin-bottom: 12px;
             font-size: 16px;
         }
-
         .file-item {
             background: #ffffff;
             border-radius: 8px;
@@ -154,22 +130,18 @@
             align-items: center;
             border: 1px solid rgba(0, 122, 255, 0.1);
         }
-
         .file-item:last-child {
             margin-bottom: 0;
         }
-
         .file-name {
             font-weight: 600;
             color: #1d1d1f;
             font-size: 14px;
         }
-
         .file-size {
             color: #86868b;
             font-size: 12px;
         }
-
         .btn {
             background: #007aff;
             color: #ffffff;
@@ -184,36 +156,27 @@
             min-height: 50px;
             width: calc(50% - 16px);
         }
-
         .btn:hover {
             background: #0056cc;
             transform: translateY(-1px);
         }
-
         .btn.secondary {
             background: #ffffff;
             color: #007aff;
             border: 1px solid #007aff;
         }
-
-        .btn.secondary:hover {
-            background: #f0f8ff;
-        }
-
         .btn:disabled {
             background: #d2d2d7;
             color: #86868b;
             cursor: not-allowed;
             transform: none;
         }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 32px;
         }
-
         .stat-card {
             background: #ffffff;
             border-radius: 12px;
@@ -221,26 +184,22 @@
             text-align: center;
             border: 1px solid rgba(0, 0, 0, 0.04);
         }
-
         .stat-value {
             font-size: 28px;
             font-weight: 700;
             color: #007aff;
             margin-bottom: 4px;
         }
-
         .stat-label {
             font-size: 14px;
             color: #86868b;
         }
-
         .cadastros-list {
             background: #ffffff;
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.04);
         }
-
         .cadastro-item {
             padding: 16px;
             border-bottom: 1px solid #f5f5f7;
@@ -248,22 +207,18 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .cadastro-item:last-child {
             border-bottom: none;
         }
-
         .cadastro-info h4 {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 4px;
         }
-
         .cadastro-info p {
             font-size: 14px;
             color: #86868b;
         }
-
         .badge {
             background: #f0f8ff;
             color: #007aff;
@@ -272,7 +227,6 @@
             font-size: 12px;
             font-weight: 600;
         }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -288,55 +242,17 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             font-size: 14px;
         }
-
         .notification.show {
             transform: translateX(0);
         }
-
         .notification.error {
             background: #ff3b30;
         }
-
         @media (max-width: 768px) {
-            .container {
-                padding: 20px 16px;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 12px 16px;
-            }
-            
-            .header h1 {
-                font-size: 18px;
-            }
-            
-            .btn {
-                width: 100%;
-                margin: 4px 0;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            
-            .upload-area {
-                padding: 30px 20px;
-            }
-            
-            .upload-icon {
-                font-size: 36px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            .container { padding: 20px 16px; }
+            .card { padding: 20px; }
+            .btn { width: 100%; margin: 4px 0; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
         }
     </style>
 </head>
@@ -348,33 +264,24 @@
             <button class="btn-logout" onclick="logout()">Sair</button>
         </div>
     </div>
-
     <div class="container">
         <div class="card">
             <h2>Upload de Extratos</h2>
             <div class="upload-section">
                 <input type="file" id="fileInput" class="file-input" multiple accept=".csv,.ofx">
-                
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon"></div>
                     <div class="upload-text">Clique aqui para selecionar arquivos</div>
                     <div class="upload-hint">Ou arraste arquivos CSV/OFX para esta area</div>
                 </div>
-                
                 <div id="filesList" class="files-list">
                     <h4>Arquivos Selecionados:</h4>
                     <div id="filesContainer"></div>
                 </div>
-                
-                <button class="btn" id="processBtn" onclick="processarArquivos()" disabled>
-                    Processar Arquivos
-                </button>
-                <button class="btn secondary" onclick="limparDados()">
-                    Limpar Dados
-                </button>
+                <button class="btn" id="processBtn" disabled>Processar Arquivos</button>
+                <button class="btn secondary" id="clearBtn">Limpar Dados</button>
             </div>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="totalCadastros">0</div>
@@ -389,7 +296,6 @@
                 <div class="stat-label">Valor Total</div>
             </div>
         </div>
-
         <div class="card">
             <h2>Cadastros Detectados</h2>
             <div id="cadastrosList" class="cadastros-list">
@@ -399,9 +305,7 @@
             </div>
         </div>
     </div>
-
     <div class="notification" id="notification"></div>
-
     <script src="database.js"></script>
     <script>
         let arquivosCarregados = [];
@@ -409,6 +313,7 @@
 
         // Inicializar sistema
         document.addEventListener("DOMContentLoaded", function() {
+            console.log("Inicializando sistema...");
             verificarPermissaoAdmin();
             inicializarSistema();
             configurarUpload();
@@ -428,13 +333,20 @@
                 return;
             }
             
-            document.getElementById("userName").textContent = dadosUsuario.nome;
+            const userNameElement = document.getElementById("userName");
+            if (userNameElement) {
+                userNameElement.textContent = dadosUsuario.nome;
+            }
         }
 
         async function inicializarSistema() {
             try {
-                await db.init();
-                await carregarDadosExistentes();
+                if (typeof db !== 'undefined') {
+                    await db.init();
+                    await carregarDadosExistentes();
+                } else {
+                    console.error("Database não carregado");
+                }
             } catch (error) {
                 console.error("Erro ao inicializar:", error);
                 mostrarNotificacao("Erro ao inicializar sistema", "error");
@@ -444,6 +356,13 @@
         function configurarUpload() {
             const fileInput = document.getElementById("fileInput");
             const uploadArea = document.getElementById("uploadArea");
+            const processBtn = document.getElementById("processBtn");
+            const clearBtn = document.getElementById("clearBtn");
+
+            if (!fileInput || !uploadArea) {
+                console.error("Elementos de upload não encontrados");
+                return;
+            }
 
             // Click na area de upload
             uploadArea.addEventListener("click", function() {
@@ -454,6 +373,16 @@
             fileInput.addEventListener("change", function(e) {
                 handleFiles(e.target.files);
             });
+
+            // Botao processar
+            if (processBtn) {
+                processBtn.addEventListener("click", processarArquivos);
+            }
+
+            // Botao limpar
+            if (clearBtn) {
+                clearBtn.addEventListener("click", limparDados);
+            }
 
             // Drag and drop
             uploadArea.addEventListener("dragover", function(e) {
@@ -484,17 +413,21 @@
             arquivosCarregados = Array.from(files);
             mostrarArquivosSelecionados(files);
             
-            // Atualizar visual da area de upload
             const uploadArea = document.getElementById("uploadArea");
-            uploadArea.classList.add("has-files");
-            uploadArea.innerHTML = `
-                <div class="upload-icon"></div>
-                <div class="upload-text">${files.length} arquivo(s) selecionado(s)</div>
-                <div class="upload-hint">Clique para selecionar outros arquivos</div>
-            `;
+            const processBtn = document.getElementById("processBtn");
 
-            // Habilitar botao processar
-            document.getElementById("processBtn").disabled = false;
+            if (uploadArea) {
+                uploadArea.classList.add("has-files");
+                uploadArea.innerHTML = `
+                    <div class="upload-icon"></div>
+                    <div class="upload-text">${files.length} arquivo(s) selecionado(s)</div>
+                    <div class="upload-hint">Clique para selecionar outros arquivos</div>
+                `;
+            }
+
+            if (processBtn) {
+                processBtn.disabled = false;
+            }
             
             mostrarNotificacao(`${files.length} arquivo(s) carregado(s) com sucesso!`);
         }
@@ -502,6 +435,8 @@
         function mostrarArquivosSelecionados(files) {
             const filesList = document.getElementById("filesList");
             const container = document.getElementById("filesContainer");
+            
+            if (!filesList || !container) return;
             
             container.innerHTML = "";
             
@@ -545,7 +480,6 @@
 
             mostrarNotificacao("Processando arquivos...");
             
-            // Reset dos cadastros para nova importacao
             const novosCadastros = [];
 
             try {
@@ -560,8 +494,10 @@
                 }
 
                 // Salvar novos cadastros
-                for (let cadastro of novosCadastros) {
-                    await db.salvarMembro(cadastro);
+                if (typeof db !== 'undefined') {
+                    for (let cadastro of novosCadastros) {
+                        await db.salvarMembro(cadastro);
+                    }
                 }
 
                 await carregarDadosExistentes();
@@ -583,7 +519,7 @@
         }
 
         function processarCSV(content, nomeArquivo, cadastros) {
-            const lines = content.split("\\n");
+            const lines = content.split("\n");
             
             if (content.includes("Data Lancamento;Descricao;Valor;Saldo")) {
                 processarCSVInter(lines, nomeArquivo, cadastros);
@@ -619,11 +555,11 @@
         }
 
         function processarOFX(content, nomeArquivo, cadastros) {
-            const transacoes = content.match(/<STMTTRN>.*?<\\/STMTTRN>/gs);
+            const transacoes = content.match(/<STMTTRN>.*?<\/STMTTRN>/gs);
             
             if (transacoes) {
                 transacoes.forEach(transacao => {
-                    const memoMatch = transacao.match(/<MEMO>(.*?)<\\/MEMO>/);
+                    const memoMatch = transacao.match(/<MEMO>(.*?)<\/MEMO>/);
                     if (memoMatch) {
                         detectarCadastro(memoMatch[1], nomeArquivo, "OFX", cadastros);
                     }
@@ -632,10 +568,9 @@
         }
 
         function detectarCadastro(descricao, arquivo, banco, cadastros) {
-            // Regex para CPF
-            const cpfRegex = /\\b\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}\\b|\\b\\d{11}\\b/;
-            // Regex para CNPJ  
-            const cnpjRegex = /\\b\\d{2}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2}\\b|\\b\\d{14}\\b/;
+            // Regex corrigidas
+            const cpfRegex = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b/;
+            const cnpjRegex = /\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b|\b\d{14}\b/;
             
             const cpfMatch = descricao.match(cpfRegex);
             const cnpjMatch = descricao.match(cnpjRegex);
@@ -644,15 +579,13 @@
                 const documento = cpfMatch ? cpfMatch[0] : cnpjMatch[0];
                 const tipo = cpfMatch ? "CPF" : "CNPJ";
                 
-                // Extrair nome da descricao
                 let nome = descricao.replace(documento, "").trim();
-                nome = nome.replace(/[^a-zA-Z\\s]/g, "").trim();
+                nome = nome.replace(/[^a-zA-Z\s]/g, "").trim();
                 
                 if (nome.length < 3) {
                     nome = `${tipo} ${documento}`;
                 }
                 
-                // Verificar se ja existe
                 const jaExiste = cadastros.find(c => c.documento === documento) || 
                                  cadastrosDetectados.find(c => c.documento === documento);
                 
@@ -671,10 +604,12 @@
 
         async function carregarDadosExistentes() {
             try {
-                const membros = await db.buscarMembros();
-                cadastrosDetectados = membros || [];
-                renderizarCadastros();
-                atualizarEstatisticas();
+                if (typeof db !== 'undefined') {
+                    const membros = await db.buscarMembros();
+                    cadastrosDetectados = membros || [];
+                    renderizarCadastros();
+                    atualizarEstatisticas();
+                }
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
             }
@@ -682,6 +617,7 @@
 
         function renderizarCadastros() {
             const container = document.getElementById("cadastrosList");
+            if (!container) return;
             
             if (cadastrosDetectados.length === 0) {
                 container.innerHTML = `
@@ -704,21 +640,37 @@
         }
 
         function atualizarEstatisticas() {
-            document.getElementById("totalCadastros").textContent = cadastrosDetectados.length;
+            const totalCadastrosEl = document.getElementById("totalCadastros");
+            const totalTransacoesEl = document.getElementById("totalTransacoes");
+            const totalValorEl = document.getElementById("totalValor");
             
-            db.buscarTransacoes().then(transacoes => {
-                document.getElementById("totalTransacoes").textContent = transacoes.length;
-                
-                const valorTotal = transacoes.reduce((sum, t) => sum + Math.abs(t.valor), 0);
-                document.getElementById("totalValor").textContent = 
-                    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorTotal);
-            });
+            if (totalCadastrosEl) {
+                totalCadastrosEl.textContent = cadastrosDetectados.length;
+            }
+            
+            if (typeof db !== 'undefined') {
+                db.buscarTransacoes().then(transacoes => {
+                    if (totalTransacoesEl) {
+                        totalTransacoesEl.textContent = transacoes.length;
+                    }
+                    
+                    const valorTotal = transacoes.reduce((sum, t) => sum + Math.abs(t.valor), 0);
+                    if (totalValorEl) {
+                        totalValorEl.textContent = 
+                            new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorTotal);
+                    }
+                }).catch(error => {
+                    console.error("Erro ao buscar transacoes:", error);
+                });
+            }
         }
 
         async function limparDados() {
             if (confirm("Deseja realmente limpar todos os dados?")) {
                 try {
-                    await db.limparDados();
+                    if (typeof db !== 'undefined') {
+                        await db.limparDados();
+                    }
                     cadastrosDetectados = [];
                     renderizarCadastros();
                     atualizarEstatisticas();
@@ -737,6 +689,8 @@
 
         function mostrarNotificacao(mensagem, tipo = "success") {
             const notification = document.getElementById("notification");
+            if (!notification) return;
+            
             notification.textContent = mensagem;
             notification.className = `notification ${tipo}`;
             notification.classList.add("show");
