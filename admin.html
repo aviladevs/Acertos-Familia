@@ -261,7 +261,7 @@
         <h1>Administracao - Avila Transportes</h1>
         <div class="user-info">
             <span id="userName">Nicolas Avila</span>
-            <button class="btn-logout" onclick="logout()">Sair</button>
+            <button class="btn-logout" id="logoutBtn">Sair</button>
         </div>
     </div>
     <div class="container">
@@ -311,41 +311,50 @@
         let arquivosCarregados = [];
         let cadastrosDetectados = [];
 
-        // Inicializar sistema
+        // Aguardar DOM carregado
         document.addEventListener("DOMContentLoaded", function() {
-            console.log("Inicializando sistema...");
-            verificarPermissaoAdmin();
-            inicializarSistema();
-            configurarUpload();
+            console.log("DOM carregado, inicializando...");
+            
+            // Aguardar um pouco para garantir que tudo carregou
+            setTimeout(function() {
+                verificarPermissaoAdmin();
+                inicializarSistema();
+                configurarUpload();
+            }, 100);
         });
 
         function verificarPermissaoAdmin() {
-            const usuarioAtual = sessionStorage.getItem("usuarioFamilia");
-            if (!usuarioAtual) {
-                window.location.href = "index.html";
-                return;
-            }
-            
-            const dadosUsuario = JSON.parse(usuarioAtual);
-            if (dadosUsuario.role !== "admin") {
-                alert("Acesso negado. Apenas administradores podem acessar esta area.");
-                window.location.href = "acertos.html";
-                return;
-            }
-            
-            const userNameElement = document.getElementById("userName");
-            if (userNameElement) {
-                userNameElement.textContent = dadosUsuario.nome;
+            try {
+                const usuarioAtual = sessionStorage.getItem("usuarioFamilia");
+                if (!usuarioAtual) {
+                    window.location.href = "index.html";
+                    return;
+                }
+                
+                const dadosUsuario = JSON.parse(usuarioAtual);
+                if (dadosUsuario.role !== "admin") {
+                    alert("Acesso negado. Apenas administradores podem acessar esta area.");
+                    window.location.href = "acertos.html";
+                    return;
+                }
+                
+                const userNameElement = document.getElementById("userName");
+                if (userNameElement) {
+                    userNameElement.textContent = dadosUsuario.nome;
+                }
+            } catch (error) {
+                console.error("Erro na verificacao de admin:", error);
             }
         }
 
         async function inicializarSistema() {
             try {
-                if (typeof db !== 'undefined') {
+                if (typeof db !== 'undefined' && db !== null) {
                     await db.init();
                     await carregarDadosExistentes();
                 } else {
-                    console.error("Database não carregado");
+                    console.warn("Database ainda nao carregado, tentando novamente...");
+                    setTimeout(inicializarSistema, 500);
                 }
             } catch (error) {
                 console.error("Erro ao inicializar:", error);
@@ -354,114 +363,136 @@
         }
 
         function configurarUpload() {
-            const fileInput = document.getElementById("fileInput");
-            const uploadArea = document.getElementById("uploadArea");
-            const processBtn = document.getElementById("processBtn");
-            const clearBtn = document.getElementById("clearBtn");
+            try {
+                const fileInput = document.getElementById("fileInput");
+                const uploadArea = document.getElementById("uploadArea");
+                const processBtn = document.getElementById("processBtn");
+                const clearBtn = document.getElementById("clearBtn");
+                const logoutBtn = document.getElementById("logoutBtn");
 
-            if (!fileInput || !uploadArea) {
-                console.error("Elementos de upload não encontrados");
-                return;
+                if (!fileInput || !uploadArea) {
+                    console.error("Elementos de upload nao encontrados");
+                    return;
+                }
+
+                // Configurar eventos apenas se os elementos existem
+                if (uploadArea) {
+                    uploadArea.addEventListener("click", function() {
+                        if (fileInput) {
+                            fileInput.click();
+                        }
+                    });
+                }
+
+                if (fileInput) {
+                    fileInput.addEventListener("change", function(e) {
+                        handleFiles(e.target.files);
+                    });
+                }
+
+                if (processBtn) {
+                    processBtn.addEventListener("click", processarArquivos);
+                }
+
+                if (clearBtn) {
+                    clearBtn.addEventListener("click", limparDados);
+                }
+
+                if (logoutBtn) {
+                    logoutBtn.addEventListener("click", logout);
+                }
+
+                // Drag and drop apenas se uploadArea existe
+                if (uploadArea) {
+                    uploadArea.addEventListener("dragover", function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        uploadArea.classList.add("dragover");
+                    });
+
+                    uploadArea.addEventListener("dragleave", function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        uploadArea.classList.remove("dragover");
+                    });
+
+                    uploadArea.addEventListener("drop", function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        uploadArea.classList.remove("dragover");
+                        handleFiles(e.dataTransfer.files);
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao configurar upload:", error);
             }
-
-            // Click na area de upload
-            uploadArea.addEventListener("click", function() {
-                fileInput.click();
-            });
-
-            // Mudanca no input file
-            fileInput.addEventListener("change", function(e) {
-                handleFiles(e.target.files);
-            });
-
-            // Botao processar
-            if (processBtn) {
-                processBtn.addEventListener("click", processarArquivos);
-            }
-
-            // Botao limpar
-            if (clearBtn) {
-                clearBtn.addEventListener("click", limparDados);
-            }
-
-            // Drag and drop
-            uploadArea.addEventListener("dragover", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadArea.classList.add("dragover");
-            });
-
-            uploadArea.addEventListener("dragleave", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadArea.classList.remove("dragover");
-            });
-
-            uploadArea.addEventListener("drop", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadArea.classList.remove("dragover");
-                handleFiles(e.dataTransfer.files);
-            });
         }
 
         function handleFiles(files) {
-            if (!files || files.length === 0) {
-                return;
-            }
+            try {
+                if (!files || files.length === 0) {
+                    return;
+                }
 
-            arquivosCarregados = Array.from(files);
-            mostrarArquivosSelecionados(files);
-            
-            const uploadArea = document.getElementById("uploadArea");
-            const processBtn = document.getElementById("processBtn");
+                arquivosCarregados = Array.from(files);
+                mostrarArquivosSelecionados(files);
+                
+                const uploadArea = document.getElementById("uploadArea");
+                const processBtn = document.getElementById("processBtn");
 
-            if (uploadArea) {
-                uploadArea.classList.add("has-files");
-                uploadArea.innerHTML = `
-                    <div class="upload-icon"></div>
-                    <div class="upload-text">${files.length} arquivo(s) selecionado(s)</div>
-                    <div class="upload-hint">Clique para selecionar outros arquivos</div>
-                `;
-            }
+                if (uploadArea) {
+                    uploadArea.classList.add("has-files");
+                    uploadArea.innerHTML = `
+                        <div class="upload-icon"></div>
+                        <div class="upload-text">${files.length} arquivo(s) selecionado(s)</div>
+                        <div class="upload-hint">Clique para selecionar outros arquivos</div>
+                    `;
+                }
 
-            if (processBtn) {
-                processBtn.disabled = false;
+                if (processBtn) {
+                    processBtn.disabled = false;
+                }
+                
+                mostrarNotificacao(`${files.length} arquivo(s) carregado(s) com sucesso!`);
+            } catch (error) {
+                console.error("Erro ao tratar arquivos:", error);
             }
-            
-            mostrarNotificacao(`${files.length} arquivo(s) carregado(s) com sucesso!`);
         }
 
         function mostrarArquivosSelecionados(files) {
-            const filesList = document.getElementById("filesList");
-            const container = document.getElementById("filesContainer");
-            
-            if (!filesList || !container) return;
-            
-            container.innerHTML = "";
-            
-            Array.from(files).forEach(file => {
-                const item = document.createElement("div");
-                item.className = "file-item";
+            try {
+                const filesList = document.getElementById("filesList");
+                const container = document.getElementById("filesContainer");
                 
-                const info = document.createElement("div");
+                if (!filesList || !container) return;
                 
-                const nome = document.createElement("div");
-                nome.className = "file-name";
-                nome.textContent = file.name;
+                container.innerHTML = "";
                 
-                const tamanho = document.createElement("div");
-                tamanho.className = "file-size";
-                tamanho.textContent = formatarTamanho(file.size);
+                Array.from(files).forEach(file => {
+                    const item = document.createElement("div");
+                    item.className = "file-item";
+                    
+                    const info = document.createElement("div");
+                    
+                    const nome = document.createElement("div");
+                    nome.className = "file-name";
+                    nome.textContent = file.name;
+                    
+                    const tamanho = document.createElement("div");
+                    tamanho.className = "file-size";
+                    tamanho.textContent = formatarTamanho(file.size);
+                    
+                    info.appendChild(nome);
+                    info.appendChild(tamanho);
+                    item.appendChild(info);
+                    
+                    container.appendChild(item);
+                });
                 
-                info.appendChild(nome);
-                info.appendChild(tamanho);
-                item.appendChild(info);
-                
-                container.appendChild(item);
-            });
-            
-            filesList.style.display = "block";
+                filesList.style.display = "block";
+            } catch (error) {
+                console.error("Erro ao mostrar arquivos:", error);
+            }
         }
 
         function formatarTamanho(bytes) {
@@ -473,16 +504,16 @@
         }
 
         async function processarArquivos() {
-            if (arquivosCarregados.length === 0) {
-                mostrarNotificacao("Selecione pelo menos um arquivo", "error");
-                return;
-            }
-
-            mostrarNotificacao("Processando arquivos...");
-            
-            const novosCadastros = [];
-
             try {
+                if (arquivosCarregados.length === 0) {
+                    mostrarNotificacao("Selecione pelo menos um arquivo", "error");
+                    return;
+                }
+
+                mostrarNotificacao("Processando arquivos...");
+                
+                const novosCadastros = [];
+
                 for (let file of arquivosCarregados) {
                     const content = await lerArquivo(file);
                     
@@ -494,7 +525,7 @@
                 }
 
                 // Salvar novos cadastros
-                if (typeof db !== 'undefined') {
+                if (typeof db !== 'undefined' && db !== null) {
                     for (let cadastro of novosCadastros) {
                         await db.salvarMembro(cadastro);
                     }
@@ -555,11 +586,14 @@
         }
 
         function processarOFX(content, nomeArquivo, cadastros) {
-            const transacoes = content.match(/<STMTTRN>.*?<\/STMTTRN>/gs);
+            // Regex corrigida para OFX
+            const regex = new RegExp("<STMTTRN>.*?</STMTTRN>", "gs");
+            const transacoes = content.match(regex);
             
             if (transacoes) {
                 transacoes.forEach(transacao => {
-                    const memoMatch = transacao.match(/<MEMO>(.*?)<\/MEMO>/);
+                    const memoRegex = new RegExp("<MEMO>(.*?)</MEMO>");
+                    const memoMatch = transacao.match(memoRegex);
                     if (memoMatch) {
                         detectarCadastro(memoMatch[1], nomeArquivo, "OFX", cadastros);
                     }
@@ -568,43 +602,49 @@
         }
 
         function detectarCadastro(descricao, arquivo, banco, cadastros) {
-            // Regex corrigidas
-            const cpfRegex = /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b/;
-            const cnpjRegex = /\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b|\b\d{14}\b/;
-            
-            const cpfMatch = descricao.match(cpfRegex);
-            const cnpjMatch = descricao.match(cnpjRegex);
-            
-            if (cpfMatch || cnpjMatch) {
-                const documento = cpfMatch ? cpfMatch[0] : cnpjMatch[0];
-                const tipo = cpfMatch ? "CPF" : "CNPJ";
+            try {
+                // Regex para CPF: 3 digitos, ponto, 3 digitos, ponto, 3 digitos, traco, 2 digitos OU 11 digitos seguidos
+                const cpfRegex = new RegExp("\\b\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}\\b|\\b\\d{11}\\b");
                 
-                let nome = descricao.replace(documento, "").trim();
-                nome = nome.replace(/[^a-zA-Z\s]/g, "").trim();
+                // Regex para CNPJ: 2 digitos, ponto, 3 digitos, ponto, 3 digitos, barra, 4 digitos, traco, 2 digitos OU 14 digitos seguidos
+                const cnpjRegex = new RegExp("\\b\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}\\b|\\b\\d{14}\\b");
                 
-                if (nome.length < 3) {
-                    nome = `${tipo} ${documento}`;
+                const cpfMatch = descricao.match(cpfRegex);
+                const cnpjMatch = descricao.match(cnpjRegex);
+                
+                if (cpfMatch || cnpjMatch) {
+                    const documento = cpfMatch ? cpfMatch[0] : cnpjMatch[0];
+                    const tipo = cpfMatch ? "CPF" : "CNPJ";
+                    
+                    let nome = descricao.replace(documento, "").trim();
+                    nome = nome.replace(/[^a-zA-Z\s]/g, "").trim();
+                    
+                    if (nome.length < 3) {
+                        nome = `${tipo} ${documento}`;
+                    }
+                    
+                    const jaExiste = cadastros.find(c => c.documento === documento) || 
+                                     cadastrosDetectados.find(c => c.documento === documento);
+                    
+                    if (!jaExiste) {
+                        cadastros.push({
+                            nome,
+                            documento,
+                            tipo,
+                            banco,
+                            arquivo,
+                            dataDeteccao: new Date().toISOString()
+                        });
+                    }
                 }
-                
-                const jaExiste = cadastros.find(c => c.documento === documento) || 
-                                 cadastrosDetectados.find(c => c.documento === documento);
-                
-                if (!jaExiste) {
-                    cadastros.push({
-                        nome,
-                        documento,
-                        tipo,
-                        banco,
-                        arquivo,
-                        dataDeteccao: new Date().toISOString()
-                    });
-                }
+            } catch (error) {
+                console.error("Erro ao detectar cadastro:", error);
             }
         }
 
         async function carregarDadosExistentes() {
             try {
-                if (typeof db !== 'undefined') {
+                if (typeof db !== 'undefined' && db !== null) {
                     const membros = await db.buscarMembros();
                     cadastrosDetectados = membros || [];
                     renderizarCadastros();
@@ -616,88 +656,104 @@
         }
 
         function renderizarCadastros() {
-            const container = document.getElementById("cadastrosList");
-            if (!container) return;
-            
-            if (cadastrosDetectados.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #86868b;">
-                        Nenhum cadastro encontrado
-                    </div>
-                `;
-                return;
-            }
+            try {
+                const container = document.getElementById("cadastrosList");
+                if (!container) return;
+                
+                if (cadastrosDetectados.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #86868b;">
+                            Nenhum cadastro encontrado
+                        </div>
+                    `;
+                    return;
+                }
 
-            container.innerHTML = cadastrosDetectados.map(cadastro => `
-                <div class="cadastro-item">
-                    <div class="cadastro-info">
-                        <h4>${cadastro.nome}</h4>
-                        <p>${cadastro.documento} (${cadastro.tipo})</p>
+                container.innerHTML = cadastrosDetectados.map(cadastro => `
+                    <div class="cadastro-item">
+                        <div class="cadastro-info">
+                            <h4>${cadastro.nome}</h4>
+                            <p>${cadastro.documento} (${cadastro.tipo})</p>
+                        </div>
+                        <span class="badge">${cadastro.banco}</span>
                     </div>
-                    <span class="badge">${cadastro.banco}</span>
-                </div>
-            `).join("");
+                `).join("");
+            } catch (error) {
+                console.error("Erro ao renderizar cadastros:", error);
+            }
         }
 
         function atualizarEstatisticas() {
-            const totalCadastrosEl = document.getElementById("totalCadastros");
-            const totalTransacoesEl = document.getElementById("totalTransacoes");
-            const totalValorEl = document.getElementById("totalValor");
-            
-            if (totalCadastrosEl) {
-                totalCadastrosEl.textContent = cadastrosDetectados.length;
-            }
-            
-            if (typeof db !== 'undefined') {
-                db.buscarTransacoes().then(transacoes => {
-                    if (totalTransacoesEl) {
-                        totalTransacoesEl.textContent = transacoes.length;
-                    }
-                    
-                    const valorTotal = transacoes.reduce((sum, t) => sum + Math.abs(t.valor), 0);
-                    if (totalValorEl) {
-                        totalValorEl.textContent = 
-                            new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorTotal);
-                    }
-                }).catch(error => {
-                    console.error("Erro ao buscar transacoes:", error);
-                });
+            try {
+                const totalCadastrosEl = document.getElementById("totalCadastros");
+                const totalTransacoesEl = document.getElementById("totalTransacoes");
+                const totalValorEl = document.getElementById("totalValor");
+                
+                if (totalCadastrosEl) {
+                    totalCadastrosEl.textContent = cadastrosDetectados.length;
+                }
+                
+                if (typeof db !== 'undefined' && db !== null) {
+                    db.buscarTransacoes().then(transacoes => {
+                        if (totalTransacoesEl) {
+                            totalTransacoesEl.textContent = transacoes.length;
+                        }
+                        
+                        const valorTotal = transacoes.reduce((sum, t) => sum + Math.abs(t.valor), 0);
+                        if (totalValorEl) {
+                            totalValorEl.textContent = 
+                                new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorTotal);
+                        }
+                    }).catch(error => {
+                        console.error("Erro ao buscar transacoes:", error);
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar estatisticas:", error);
             }
         }
 
         async function limparDados() {
-            if (confirm("Deseja realmente limpar todos os dados?")) {
-                try {
-                    if (typeof db !== 'undefined') {
+            try {
+                if (confirm("Deseja realmente limpar todos os dados?")) {
+                    if (typeof db !== 'undefined' && db !== null) {
                         await db.limparDados();
                     }
                     cadastrosDetectados = [];
                     renderizarCadastros();
                     atualizarEstatisticas();
                     mostrarNotificacao("Dados limpos com sucesso!");
-                } catch (error) {
-                    console.error("Erro ao limpar:", error);
-                    mostrarNotificacao("Erro ao limpar dados", "error");
                 }
+            } catch (error) {
+                console.error("Erro ao limpar:", error);
+                mostrarNotificacao("Erro ao limpar dados", "error");
             }
         }
 
         function logout() {
-            sessionStorage.removeItem("usuarioFamilia");
-            window.location.href = "index.html";
+            try {
+                sessionStorage.removeItem("usuarioFamilia");
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+            }
         }
 
         function mostrarNotificacao(mensagem, tipo = "success") {
-            const notification = document.getElementById("notification");
-            if (!notification) return;
-            
-            notification.textContent = mensagem;
-            notification.className = `notification ${tipo}`;
-            notification.classList.add("show");
-            
-            setTimeout(() => {
-                notification.classList.remove("show");
-            }, 3000);
+            try {
+                const notification = document.getElementById("notification");
+                if (!notification) return;
+                
+                notification.textContent = mensagem;
+                notification.className = `notification ${tipo}`;
+                notification.classList.add("show");
+                
+                setTimeout(() => {
+                    notification.classList.remove("show");
+                }, 3000);
+            } catch (error) {
+                console.error("Erro ao mostrar notificacao:", error);
+            }
         }
     </script>
 </body>
