@@ -1,5 +1,7 @@
 # 👨‍👩‍👧‍👦 Sistema de Acertos Família Rosa Avila Barros
 
+![Uptime](https://github.com/aviladevs/avilatransportes/actions/workflows/uptime.yml/badge.svg?branch=main)
+
 Sistema completo para gestão de acertos familiares com controle de acesso e análise financeira.
 
 ## 🏠 Estrutura do Sistema
@@ -106,6 +108,43 @@ O sistema é totalmente responsivo e funciona em:
 - **JavaScript ES6+** - Lógica de negócio e processamento
 - **File API** - Upload e processamento de arquivos
 - **SessionStorage** - Gerenciamento de sessão
+
+## 🌐 Domínio, HTTPS e Monitoramento
+
+### Enforce HTTPS (GitHub Pages)
+
+1. Repositório no GitHub → Settings → Pages
+2. Custom domain: confirme `avilatransportes.com.br` (o arquivo `CNAME` já está no repositório)
+3. Ative “Enforce HTTPS” (após o certificado ser provisionado pelo GitHub)
+
+Camada extra no código:
+- Todas as páginas incluem `force-https.js` que redireciona automaticamente para HTTPS (exceto localhost/file) e meta `Content-Security-Policy: upgrade-insecure-requests`.
+
+### DNS (resumo)
+
+- Aponte o domínio `avilatransportes.com.br` para GitHub Pages com os CNAMEs sugeridos pelo GitHub (normalmente `username.github.io.`)
+- Mantenha o arquivo `CNAME` com `avilatransportes.com.br` na raiz do repositório
+
+### Monitoramento de Uptime (GitHub Actions)
+
+Workflow: `.github/workflows/uptime.yml`
+- Agenda: a cada 30 minutos (ou manual via Actions)
+- URLs verificadas:
+   - https://avilatransportes.com.br
+   - https://www.avilatransportes.com.br
+   - https://aviladevs.github.io/avilatransportes/
+- Em caso de falha: abre automaticamente um Issue com detalhes
+
+Notificações opcionais:
+- Slack: crie um Incoming Webhook e adicione o secret no repo
+   - Settings → Secrets and variables → Actions → New repository secret
+   - Nome: `SLACK_WEBHOOK_URL` | Valor: URL do webhook
+- Telegram: (opcional) crie um bot (BotFather) e obtenha `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`
+   - Adicione os secrets no repo e podemos ativar o passo (está comentado no workflow)
+- E-mail: podemos adicionar futuramente via SMTP (SendGrid/Mailgun/outros) sob demanda
+
+Badge de status:
+- Já incluso no topo deste README (status do workflow `uptime.yml` na branch `main`).
 
 ## 📋 Dados de Exemplo
 

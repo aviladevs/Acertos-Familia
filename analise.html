@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <script src="force-https.js"></script>
     <title>Acerto de Contas - Análise Financeira</title>
     <style>
         * {
@@ -10,6 +12,13 @@
             padding: 0;
             box-sizing: border-box;
         }
+    .center { text-align:center; }
+    .mt-20 { margin-top:20px; }
+    .ml-15 { margin-left:15px; }
+    .muted { color:#718096; }
+    .error-box { text-align:center; padding:40px; color:#e53e3e; }
+    .ellipsis { max-width:300px; overflow:hidden; text-overflow:ellipsis; }
+    .modal-box { background:white; padding:30px; border-radius:15px; max-width:80%; max-height:80%; overflow-y:auto; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -352,11 +361,11 @@
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 20px;">
+            <div class="center mt-20">
                 <button class="btn" id="processBtn" onclick="processarExtratos()" disabled>
                     📈Processar e Analisar Extratos
                 </button>
-                <button class="btn" onclick="carregarDadosExemplo()" style="margin-left: 15px;">
+                <button class="btn ml-15" onclick="carregarDadosExemplo()">
                     🎯Carregar Dados de Exemplo
                 </button>
             </div>
@@ -491,7 +500,7 @@
                     populateFilters();
                 } catch (error) {
                     resultsSection.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #e53e3e;">
+                        <div class="error-box">
                             <h3>❌ Erro ao processar extratos</h3>
                             <p>${error.message}</p>
                         </div>
@@ -644,7 +653,7 @@
             const container = document.getElementById('transactionsContainer');
             
             if (transacoes.length === 0) {
-                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #718096;">Nenhuma transação encontrada com os filtros aplicados.</p>';
+                container.innerHTML = '<p class="center muted" style="padding:40px;">Nenhuma transação encontrada com os filtros aplicados.</p>';
                 return;
             }
             
@@ -665,12 +674,12 @@
                             <tr>
                                 <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
                                 <td><span class="banco-tag banco-${t.banco.toLowerCase()}">${t.banco}</span></td>
-                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${t.descricao}</td>
+                                <td class="ellipsis">${t.descricao}</td>
                                 <td class="${t.valor >= 0 ? 'valor-positivo' : 'valor-negativo'}">
                                     R$ ${Math.abs(t.valor).toFixed(2)}
                                 </td>
                                 <td><span class="categoria-tag">${t.categoria}</span></td>
-                                <td>${t.membro || 'N�o identificado'}</td>
+                                <td>${t.membro || 'N�o identificado'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -714,7 +723,7 @@
             `;
             
             modal.innerHTML = `
-                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 80%; max-height: 80%; overflow-y: auto;">
+                <div class="modal-box">
                     <h2>🔍 Análise de Transações Suspeitas</h2>
                     
                     <h3>💰 Transações de Alto Valor (> R$ 5.000)</h3>
@@ -723,7 +732,7 @@
                     <h3>🔄 Transações Repetidas (3+ no mesmo dia)</h3>
                     <p>Encontradas ${suspeitas.transacoesRepetidas.length} transações repetidas</p>
                     
-                    <div style="margin-top: 20px; text-align: center;">
+                    <div class="center mt-20">
                         <button class="btn" onclick="this.parentElement.parentElement.parentElement.remove()">
                             Fechar
                         </button>

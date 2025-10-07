@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Avila Transportes - Administração</title>
+    <script src="force-https.js"></script>
     <style>
         * {
             margin: 0;
@@ -434,6 +436,16 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        /* Bloco de Importação Inter */
+        .inter-card { margin-top: 16px; padding: 16px; }
+        .inter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .inter-label { font-weight: 600; font-size: 12px; color: #86868b; display: block; margin-bottom: 6px; }
+        .inter-input { width: 200px; padding: 10px; }
+        .inter-hint { font-size: 12px; color: #86868b; margin-top: 8px; }
+        .placeholder { text-align: center; color: #86868b; padding: 40px; }
+    .hidden { display: none; }
+    .inter-card h3 { margin-bottom: 12px; }
         
         @media (max-width: 768px) {
             .container { padding: 20px 16px; }
@@ -478,11 +490,28 @@
                         <h4>Arquivos Selecionados:</h4>
                         <div id="filesContainer"></div>
                     </div>
-                    <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-bar hidden" id="progressBar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
                     <button class="btn" id="processBtn" disabled>Processar Arquivos</button>
                     <button class="btn secondary" id="clearBtn">Limpar Dados</button>
+
+                    <!-- Importação via API do Banco Inter -->
+                    <div class="card inter-card">
+                        <h3>Importar do Banco Inter (API)</h3>
+                        <div class="inter-row">
+                            <div>
+                                <label for="dataInicio" class="inter-label">Data início</label>
+                                <input type="date" id="dataInicio" class="form-input inter-input" />
+                            </div>
+                            <div>
+                                <label for="dataFim" class="inter-label">Data fim</label>
+                                <input type="date" id="dataFim" class="form-input inter-input" />
+                            </div>
+                            <button class="btn" id="btnImportarInter">Importar do Inter</button>
+                        </div>
+                        <div class="inter-hint">O backend deve estar rodando em http://127.0.0.1:8000</div>
+                    </div>
                 </div>
             </div>
             
@@ -560,8 +589,8 @@
                         </thead>
                         <tbody id="cadastrosTableBody">
                             <tr>
-                                <td colspan="6" style="text-align: center; color: #86868b; padding: 40px;">
-                                    Nenhum cadastro encontrado
+                                <td colspan="6">
+                                    <div class="placeholder">Nenhum cadastro encontrado</div>
                                 </td>
                             </tr>
                         </tbody>
@@ -576,7 +605,7 @@
                 <h2> Análise por Cliente</h2>
                 <input type="text" id="searchClientes" class="search-box" placeholder=" Buscar cliente...">
                 <div id="clientesContainer">
-                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                    <div class="placeholder">
                         Nenhum cliente com transações encontrado
                     </div>
                 </div>
@@ -588,7 +617,7 @@
             <div class="card">
                 <h2> Análise Detalhada dos Extratos</h2>
                 <div id="analiseResults">
-                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                    <div class="placeholder">
                         Importe arquivos para ver a análise detalhada
                     </div>
                 </div>
@@ -726,6 +755,12 @@
                 
                 if (searchClientes) {
                     searchClientes.addEventListener("input", filtrarClientes);
+                }
+
+                // Botão Importar do Inter (API)
+                const btnImportarInter = document.getElementById('btnImportarInter');
+                if (btnImportarInter) {
+                    btnImportarInter.addEventListener('click', importarDoInter);
                 }
                 
                 console.log("Eventos configurados com sucesso!");
@@ -876,7 +911,7 @@
             const progressFill = document.getElementById("progressFill");
             
             if (progressBar && progressFill) {
-                progressBar.style.display = "block";
+                progressBar.classList.remove('hidden');
                 progressFill.style.width = percentage + "%";
             }
         }
@@ -884,7 +919,7 @@
         function ocultarProgresso() {
             const progressBar = document.getElementById("progressBar");
             if (progressBar) {
-                progressBar.style.display = "none";
+                progressBar.classList.add('hidden');
             }
         }
         
@@ -899,7 +934,7 @@
         
         function processarCSV(content, nomeArquivo, cadastros, transacoes) {
             console.log("Processando CSV:", nomeArquivo);
-            const lines = content.split("\\n");
+            const lines = content.split(/\r?\n/);
             
             if (content.includes("Data Lancamento;Descricao;Valor;Saldo") || 
                 content.includes("Data,Descricao,Valor,Saldo")) {
@@ -1004,10 +1039,10 @@
             return null;
         }
         
-        function detectarEVincularCadastro(descricao, arquivo, banco, cadastros) {
+    function detectarEVincularCadastro(descricao, arquivo, banco, cadastros) {
             try {
-                const cpfRegex = /\\b\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}\\b|\\b\\d{11}\\b/;
-                const cnpjRegex = /\\b\\d{2}\\.?\\d{3}\\.?\\d{3}\\/?\\d{4}-?\\d{2}\\b|\\b\\d{14}\\b/;
+        const cpfRegex = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\b\d{11}\b/;
+        const cnpjRegex = /\b\d{2}\.?\d{3}\.?\d{3}\/??\d{4}-?\d{2}\b|\b\d{14}\b/;
                 
                 const cpfMatch = descricao.match(cpfRegex);
                 const cnpjMatch = descricao.match(cnpjRegex);
@@ -1056,42 +1091,42 @@
                 // Remove prefixos comuns
                 .replace(/Pix (recebido|enviado):/gi, '')
                 .replace(/Transferencia (recebida|enviada):/gi, '')
-                .replace(/Transferência (recebida|enviada) pelo Pix\\s*-?/gi, '')
-                .replace(/Transferência Recebida\\s*-?/gi, '')
-                .replace(/Cp\\s*:\\s*\\d+\\s*-?/gi, '')
-                .replace(/^\\d+\\s+\\d+\\s+\\d+\\s+/gi, '') // Remove códigos iniciais como "341 9 147786"
-                .replace(/^\\d+\\s+/gi, '') // Remove números iniciais
+                .replace(/Transferência (recebida|enviada) pelo Pix\s*-?/gi, '')
+                .replace(/Transferência Recebida\s*-?/gi, '')
+                .replace(/Cp\s*:\s*\d+\s*-?/gi, '')
+                .replace(/^\d+\s+\d+\s+\d+\s+/gi, '') // Remove códigos iniciais como "341 9 147786"
+                .replace(/^\d+\s+/gi, '') // Remove números iniciais
                 .replace(/"/g, '') // Remove aspas
                 .trim();
 
             // Remove o documento do texto se encontrado
             if (documento) {
                 // Remove documento com formatação
-                nome = nome.replace(new RegExp(documento.replace(/[.\\/\\-]/g, '\\\\$&'), 'gi'), '');
+                nome = nome.replace(new RegExp(documento.replace(/[.\/\-]/g, '\\$&'), 'gi'), '');
                 // Remove documento sem formatação
-                const documentoNumeros = documento.replace(/[^\\d]/g, '');
+                const documentoNumeros = documento.replace(/[^\d]/g, '');
                 nome = nome.replace(new RegExp(documentoNumeros, 'gi'), '');
                 // Remove traços isolados que sobraram
-                nome = nome.replace(/\\s*-\\s*$/, '').replace(/^\\s*-\\s*/, '');
+                nome = nome.replace(/\s*-\s*$/, '').replace(/^\s*-\s*/, '');
             }
 
             // Remove datas no formato DD/MM/AAAA
-            nome = nome.replace(/\\d{2}\\/\\d{2}\\/\\d{4}/g, '');
+            nome = nome.replace(/\d{2}\/\d{2}\/\d{4}/g, '');
             
             // Remove CPF mascarado
-                nome = nome.replace(/\\b\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}\\b/g, '');
+            nome = nome.replace(/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/g, '');
             
             // Remove números de CPF completos
-            nome = nome.replace(/\\d{11}/g, '');
+            nome = nome.replace(/\d{11}/g, '');
             
             // Remove informações bancárias
-            nome = nome.replace(/\\s*-\\s*[A-Z\\s]+(SCFI|S\\.?A\\.?|LTDA|ME|EPP)?\\s*\\(\\d+\\)\\s*Agência:\\s*\\d+\\s*Conta:\\s*[\\d\\-]+/gi, '');
+            nome = nome.replace(/\s*-\s*[A-Z\s]+(SCFI|S\.?A\.?|LTDA|ME|EPP)?\s*\(\d+\)\s*Agência:\s*\d+\s*Conta:\s*[\d\-]+/gi, '');
             
             // Remove espaços múltiplos e trim
-            nome = nome.replace(/\\s+/g, ' ').trim();
+            nome = nome.replace(/\s+/g, ' ').trim();
             
             // Remove hífen no final ou início
-            nome = nome.replace(/^-\\s*/, '').replace(/\\s*-$/, '');
+            nome = nome.replace(/^\s*-/, '').replace(/-\s*$/, '');
             
             // Capitaliza o nome corretamente
             if (nome.length > 2) {
@@ -1101,6 +1136,84 @@
             }
 
             return nome || 'Nome não identificado';
+        }
+
+        // Importação do Inter via backend local
+        async function importarDoInter() {
+            try {
+                const inicio = document.getElementById('dataInicio')?.value;
+                const fim = document.getElementById('dataFim')?.value;
+                if (!inicio || !fim) {
+                    mostrarNotificacao('Informe a data início e fim', 'error');
+                    return;
+                }
+                mostrarNotificacao('Consultando extrato no backend...');
+                mostrarProgresso(10);
+
+                const url = `http://127.0.0.1:8000/inter/extrato?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error('Falha ao consultar backend');
+
+                let data;
+                try {
+                    data = await resp.json();
+                } catch (e) {
+                    // Fallback: tratar como texto OFX
+                    const texto = await resp.text();
+                    const cad = [];
+                    const txs = [];
+                    processarOFX(texto, `INTER_API_${inicio}_${fim}.ofx`, cad, txs);
+                    cadastrosDetectados.push(...cad);
+                    todasTransacoes.push(...txs);
+                    processarParaAnalise(txs);
+                    carregarDadosExistentes();
+                    ocultarProgresso();
+                    mostrarNotificacao(`Importadas ${txs.length} transações do Inter (OFX)`);
+                    return;
+                }
+
+                // Normalizar possíveis formatos de resposta
+                const lista = Array.isArray(data) ? data : (data.transacoes || data.lista || data.items || []);
+                const novosCadastros = [];
+                const novasTransacoes = [];
+
+                lista.forEach((item) => {
+                    const brutoDescricao = item.descricao || item.historico || item.memo || item.nome || '';
+                    const valorBruto = item.valor || item.amount || item.valorLancamento || item.valorOperacao || 0;
+                    const tipo = (item.tipo || item.natureza || item.sinal || '').toString().toUpperCase();
+                    let valor = parseFloat(String(valorBruto).replace(',', '.')) || 0;
+                    if (tipo === 'D' || tipo === 'DEBITO' || tipo === 'DEBITO' || tipo === 'DEBITO') {
+                        valor = -Math.abs(valor);
+                    }
+                    const d = item.data || item.dt || item.dataLancamento || item.dtPost || item.dt_posted || '';
+                    const dataFmt = (typeof d === 'string' && d.length >= 10) ? d.substring(0,10) : '';
+
+                    const clienteInfo = detectarEVincularCadastro(brutoDescricao, 'InterAPI', 'Inter', novosCadastros);
+                    if (clienteInfo || brutoDescricao.trim()) {
+                        novasTransacoes.push({
+                            id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            data: dataFmt,
+                            descricao: brutoDescricao,
+                            valor: valor,
+                            banco: 'Inter',
+                            arquivo: `INTER_API_${inicio}_${fim}`,
+                            clienteDocumento: clienteInfo?.documento || null,
+                            clienteNome: clienteInfo?.nome || limparNomeEmpresa(brutoDescricao)
+                        });
+                    }
+                });
+
+                cadastrosDetectados.push(...novosCadastros);
+                todasTransacoes.push(...novasTransacoes);
+                processarParaAnalise(novasTransacoes);
+                carregarDadosExistentes();
+                ocultarProgresso();
+                mostrarNotificacao(`Importadas ${novasTransacoes.length} transações do Inter`);
+            } catch (err) {
+                console.error('Erro ao importar do Inter:', err);
+                ocultarProgresso();
+                mostrarNotificacao('Erro ao importar do Inter', 'error');
+            }
         }
         
         function processarParaAnalise(transacoes) {
@@ -1199,9 +1312,7 @@
             if (cadastrosDetectados.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; color: #86868b; padding: 40px;">
-                            Nenhum cadastro encontrado
-                        </td>
+                        <td colspan="6"><div class="placeholder">Nenhum cadastro encontrado</div></td>
                     </tr>
                 `;
                 return;
@@ -1213,11 +1324,11 @@
                 return `
                     <tr>
                         <td>
-                            <div style="font-weight: 600;">${cadastro.nome}</div>
-                            <div style="font-size: 12px; color: #86868b;">${cadastro.observacoes || ''}</div>
+                            <div class="cliente-nome">${cadastro.nome}</div>
+                            <div class="stat-label">${cadastro.observacoes || ''}</div>
                         </td>
                         <td>
-                            <span style="font-family: monospace; background: #f8f9fa; padding: 4px 8px; border-radius: 4px;">
+                            <span class="cnpj">
                                 ${cadastro.documento}
                             </span>
                         </td>
@@ -1226,7 +1337,7 @@
                         </td>
                         <td>
                             <div>${cadastro.email || '-'}</div>
-                            <div style="font-size: 12px; color: #86868b;">${cadastro.telefone || ''}</div>
+                            <div class="stat-label">${cadastro.telefone || ''}</div>
                         </td>
                         <td>
                             <span class="badge">${transacoesCount} transações</span>
@@ -1251,7 +1362,7 @@
             
             if (clientesMap.size === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                    <div class="placeholder">
                         Importe arquivos para ver análise de clientes
                     </div>
                 `;
@@ -1307,7 +1418,7 @@
             
             if (clientesMap.size === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; color: #86868b; padding: 40px;">
+                    <div class="placeholder">
                         Importe arquivos para ver a análise detalhada
                     </div>
                 `;
