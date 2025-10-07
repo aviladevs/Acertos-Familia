@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ávila Transportes - Sistema de Acertos Família</title>
+    <meta name="description" content="Sistema de controle financeiro dos acertos da família com Ávila Transportes">
+    <meta name="keywords" content="Ávila Transportes, acertos, família, financeiro">
+    <meta name="author" content="Família Rosa Avila Barros">
+    <link rel="canonical" href="https://avilatransportes.com.br/acertos/">
+    <meta property="og:title" content="Ávila Transportes - Acertos Família">
+    <meta property="og:description" content="Sistema de controle dos acertos financeiros da família">
+    <meta property="og:url" content="https://avilatransportes.com.br/acertos/">
+    <meta property="og:type" content="website">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .main-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background-color: #34495e;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .main-button:hover {
+            background-color: #2c3e50;
+        }
+
+        .content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            margin-top: 20px;
+        }
+
+        .section p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        .steps {
+            counter-reset: step-counter;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 15px;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #3498db;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Acerto de Contas da Família</h1>
+            <p>Informações sobre o processo de interdição e análise financeira</p>
+            
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                <button class="main-button" onclick="toggleContent()">⚖️ Interdição</button>
+                <button class="main-button" onclick="window.open('analise.html', '_blank')" style="background-color: #2980b9;">📊 Análise Financeira</button>
+                <button class="main-button" onclick="window.open('login.html', '_blank')" style="background-color: #27ae60;">👥 Acertos Família</button>
+            </div>
+        </div>
+
+        <div class="content" id="content" style="display: none;">
+            <div class="highlight-box">
+                <p><strong>Importante:</strong> Para "interditar" uma pessoa no Brasil, é preciso entrar com um processo judicial de interdição, promovido pelo cônjuge, parentes, tutores ou Ministério Público, comprovando a incapacidade da pessoa de gerir seus bens e atos da vida civil, geralmente por meio de laudo médico e perícia.</p>
+            </div>
+
+            <div class="section">
+                <h2>O que é o processo de interdição?</h2>
+                <p>É um processo judicial que visa proteger indivíduos considerados incapazes de tomar decisões por si mesmos, devido a doenças mentais, físicas ou outros impedimentos. Nesse processo, o juiz declara que a pessoa (interditando) não tem mais autonomia e nomeia um curador para gerir seus bens e praticar atos da vida civil em seu nome.</p>
+            </div>
+
+            <div class="section">
+                <h2>Quem pode pedir a interdição?</h2>
+                <p>A ação pode ser iniciada por:</p>
+                <ul>
+                    <li>Cônjuge ou companheiro(a)</li>
+                    <li>Parentes (em alguns casos, o Código Civil especifica os graus de parentesco)</li>
+                    <li>Tutores</li>
+                    <li>Representantes de instituições em que a pessoa se encontra abrigada</li>
+                    <li>O próprio Ministério Público</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Passos para interditar uma pessoa</h2>
+                <ol class="steps">
+                    <li><strong>Contratar um advogado:</strong> É essencial para orientar sobre a documentação e conduzir o processo.</li>
+                    <li><strong>Reunir documentos:</strong> Incluindo o laudo médico que ateste a incapacidade, documentos do interditando e do requerente, e testemunhas.</li>
+                    <li><strong>Petição inicial:</strong> O advogado irá elaborar a petição inicial, detalhando os fatos que comprovam a incapacidade.</li>
+                    <li><strong>Citação do interditando:</strong> A pessoa que será interditada será citada para comparecer perante o juiz.</li>
+                    <li><strong>Entrevista e perícia:</strong> O juiz entrevistará o interditando e determinará uma perícia médica para avaliar a capacidade da pessoa.</li>
+                    <li><strong>Sentença judicial:</strong> Com base nas provas, o juiz proferirá uma sentença, podendo decretar a interdição e nomear um curador, fixando os limites da curatela.</li>
+                    <li><strong>Publicação da sentença:</strong> A decisão judicial será publicada em editais para que todos tomem ciência.</li>
+                </ol>
+            </div>
+
+            <div class="section">
+                <h2>Situações que podem levar à interdição</h2>
+                <p>Pessoas que possuem dificuldades em compreender e gerenciar suas ações e bens podem ser interditadas, como:</p>
+                <ul>
+                    <li>Idosos com doenças como Alzheimer ou outras demências</li>
+                    <li>Pessoas com deficiências intelectuais graves</li>
+                    <li>Pessoas com transtornos psiquiátricos severos</li>
+                    <li>Pessoas com dependência química que colocam sua vida e saúde em risco</li>
+                    <li>Indivíduos que sofreram traumas graves, como um Acidente Vascular Cerebral (AVC)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>O juiz ouvirá o interditando, analisará as provas e, se a interdição for concedida, nomeará um curador para atuar em nome da pessoa, sempre protegendo os seus interesses.</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleContent() {
+            const content = document.getElementById('content');
+            const button = document.querySelector('.main-button');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.textContent = 'Ocultar';
+                content.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                content.style.display = 'none';
+                button.textContent = 'Interdição';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
