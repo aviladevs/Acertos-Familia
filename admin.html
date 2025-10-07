@@ -444,10 +444,11 @@
         .inter-input { width: 200px; padding: 10px; }
         .inter-hint { font-size: 12px; color: #86868b; margin-top: 8px; }
         .placeholder { text-align: center; color: #86868b; padding: 40px; }
-    .hidden { display: none; }
-    .inter-card h3 { margin-bottom: 12px; }
-        
-        @media (max-width: 768px) {
+        .hidden { display: none; }
+        .inter-card h3 { margin-bottom: 12px; }
+        .mt-12 { margin-top: 12px; }
+        .flex-1 { flex: 1; }
+        .w-full { width: 100%; }        @media (max-width: 768px) {
             .container { padding: 20px 16px; }
             .card { padding: 20px; }
             .btn { width: 100%; margin: 4px 0; }
@@ -517,7 +518,13 @@
                             </div>
                             <button class="btn" id="btnImportarInter">Importar do Inter</button>
                         </div>
-                        <div class="inter-hint">O backend deve estar rodando em http://127.0.0.1:8000</div>
+                        <div class="inter-row mt-12">
+                            <div class="flex-1">
+                                <label for="backendUrl" class="inter-label">URL do Backend</label>
+                                <input type="url" id="backendUrl" class="form-input w-full" value="http://127.0.0.1:8000" placeholder="https://seu-projeto.up.railway.app" />
+                            </div>
+                        </div>
+                        <div class="inter-hint">Local: http://127.0.0.1:8000 | Railway: https://seu-projeto.up.railway.app</div>
                     </div>
                 </div>
             </div>
@@ -768,6 +775,20 @@
                 const btnImportarInter = document.getElementById('btnImportarInter');
                 if (btnImportarInter) {
                     btnImportarInter.addEventListener('click', importarDoInter);
+                }
+                
+                // Configuração URL do backend
+                const backendUrlInput = document.getElementById('backendUrl');
+                if (backendUrlInput) {
+                    // Carregar URL salva
+                    const savedUrl = localStorage.getItem('avilaBackendUrl');
+                    if (savedUrl) {
+                        backendUrlInput.value = savedUrl;
+                    }
+                    // Salvar mudanças
+                    backendUrlInput.addEventListener('change', function() {
+                        localStorage.setItem('avilaBackendUrl', this.value);
+                    });
                 }
                 
                 console.log("Eventos configurados com sucesso!");
@@ -1145,7 +1166,7 @@
             return nome || 'Nome não identificado';
         }
 
-        // Importação do Inter via backend local
+        // Importação do Inter via backend configurável
         async function importarDoInter() {
             try {
                 const inicio = document.getElementById('dataInicio')?.value;
@@ -1157,10 +1178,11 @@
                 mostrarNotificacao('Consultando extrato no backend...');
                 mostrarProgresso(10);
 
+                const backendUrl = document.getElementById('backendUrl')?.value?.trim() || 'http://127.0.0.1:8000';
                 const usarMock = document.getElementById('usarMockExtrato')?.checked;
                 const url = usarMock
-                    ? `http://127.0.0.1:8000/inter/extrato_mock?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
-                    : `http://127.0.0.1:8000/inter/extrato?data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}`;
+                    ? `${backendUrl}/inter/extrato_mock?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`
+                    : `${backendUrl}/inter/extrato?data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}`;
                 const resp = await fetch(url);
                 if (!resp.ok) {
                     const txt = await resp.text();
