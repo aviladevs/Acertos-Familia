@@ -1,11 +1,11 @@
 {
-  "name": "sistema-acertos-familia",
+  "name": "avila-devops",
   "version": "1.0.0",
-  "description": "Sistema de controle de acertos financeiros da família com Ávila DevOps",
+  "description": "Sistema de controle financeiro e acertos - Ávila DevOps",
   "main": "index.html",
   "scripts": {
     "start": "live-server --port=3000",
-    "deploy": "echo 'Deploy para avilatransportes.com.br'"
+    "deploy": "echo 'Deploy para aviladevops.com.br'"
   },
   "devDependencies": {
     "live-server": "^1.2.2"
@@ -19,7 +19,7 @@
   ],
   "author": "Sistema Família Rosa Avila Barros",
   "license": "Private",
-  "homepage": "https://avilatransportes.com.br",
+  "homepage": "https://aviladevops.com.br",
   "repository": {
     "type": "git",
     "url": "https://github.com/aviladevs/avilatransportes"

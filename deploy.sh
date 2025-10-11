@@ -1,19 +1,21 @@
 #!/bin/bash
-# Script de deploy para avilatransportes.com.br
+# Script de deploy para Railway - aviladevops.com.br
 
-echo "🚀 DEPLOY PARA AVILATRANSPORTES.COM.BR"
+echo "🚀 DEPLOY PARA AVILADEVOPS.COM.BR"
 echo "======================================"
 
-echo "✅ Verificando arquivos..."
+echo "✅ Verificando arquivos essenciais..."
 FILES=(
     "index.html"
     "login.html" 
     "acertos.html"
     "analise.html"
     "extratos.js"
-    "dados-exemplo.js"
-    ".htaccess"
-    "package.json"
+    "backend/server.py"
+    "backend/db.py"
+    "requirements.txt"
+    "Procfile"
+    "start.sh"
 )
 
 for file in "${FILES[@]}"; do
@@ -25,11 +27,10 @@ for file in "${FILES[@]}"; do
 done
 
 echo ""
-echo "🔒 ATENÇÃO: ALTERAR SENHAS ANTES DO DEPLOY!"
-echo "Editar login.html linhas 142-157"
+echo "📤 DEPLOY VIA GIT PUSH:"
+echo "  git push origin main"
 echo ""
-echo "📤 UPLOAD VIA FTP/CPANEL:"
-echo "Destino: /public_html/acertos/"
+echo "🚂 Railway fará deploy automático"
 echo ""
 echo "🌐 URL FINAL:"
-echo "https://avilatransportes.com.br/acertos/"
+echo "https://aviladevops.com.br"
