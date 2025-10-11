@@ -1,0 +1,22 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "bash start.sh"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[deploy.healthcheck]
+path = "/health"
+timeout = 100
+interval = 30
+
+[deploy.runtime]
+# Railway define PORT automaticamente
+
+[env]
+# Variáveis definidas no Railway Dashboard
+# DB_PATH=/data/clientes.db
+# CORS_ORIGINS=https://aviladevops.com.br,http://127.0.0.1:5500
+# PORT=8000
