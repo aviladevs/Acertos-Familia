@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from .db import Database, DBConfig
 from typing import Optional, Dict, Any
@@ -17,6 +18,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# Montar arquivos estáticos (frontend)
+app.mount("/", StaticFiles(directory="../", html=True), name="static")
 
 db = Database(DBConfig.from_env())
 
