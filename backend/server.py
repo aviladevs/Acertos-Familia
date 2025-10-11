@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from .db import Database, DBConfig
 from typing import Optional, Dict, Any
 import os
+from pathlib import Path
 
 load_dotenv()
 app = FastAPI(title="Avila DevOps API", version="0.1.0")
@@ -20,8 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Montar arquivos estáticos (frontend)
-app.mount("/", StaticFiles(directory="../", html=True), name="static")
+# Determinar diretório raiz do projeto (um nível acima de backend/)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 db = Database(DBConfig.from_env())
 
@@ -98,6 +100,38 @@ def sync_inserir(payload: Dict[str, Any], current_user: Dict = Depends(get_curre
         return {"inseridos": inseridos}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================
+# Servir arquivos estáticos (APÓS todas as rotas da API)
+# ==================
+
+# Montar arquivos estáticos (JS, CSS, imagens, etc)
+app.mount("/static", StaticFiles(directory=str(BASE_DIR)), name="static_files")
+
+# Rota raiz - serve index.html
+@app.get("/")
+async def read_root():
+    index_path = BASE_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"message": "Avila DevOps API", "docs": "/docs", "health": "/health"}
+
+# Catch-all para servir páginas HTML (login, acertos, etc)
+@app.get("/{page_name}.html")
+async def serve_html(page_name: str):
+    file_path = BASE_DIR / f"{page_name}.html"
+    if file_path.exists():
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="Página não encontrada")
+
+# Servir arquivos JS
+@app.get("/{file_name}.js")
+async def serve_js(file_name: str):
+    file_path = BASE_DIR / f"{file_name}.js"
+    if file_path.exists():
+        return FileResponse(file_path, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="Arquivo não encontrado")
 
 
 if __name__ == "__main__":
