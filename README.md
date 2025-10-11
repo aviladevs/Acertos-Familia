@@ -1,22 +1,50 @@
-# Sistema de Acertos Família - Ávila DevOps
+# Ávila DevOps - Sistema de Controle Financeiro
 
-Um sistema completo para controle de acertos financeiros da família, desenvolvido pela equipe Ávila DevOps. Gerencia transações, análises financeiras e integra com APIs bancárias para automação.
+Sistema completo para controle de acertos financeiros da família, desenvolvido pela equipe Ávila DevOps. Gerencia transações, análises financeiras e processa extratos bancários com automação inteligente.
+
+**🌐 Aplicação Live:** https://aviladevops.com.br
+
+## 📖 Resumo para IA
+
+Este é um sistema full-stack de gestão financeira familiar que combina:
+- **Frontend estático** (HTML/CSS/JS) servido pelo FastAPI
+- **Backend Python** (FastAPI + SQLite) com API RESTful
+- **Deploy automatizado** no Railway via Git push
+- **Processamento de extratos** bancários (CSV/OFX) com extração de CPF/CNPJ
+- **Autenticação simples** com roles (admin/user)
+
+**Stack principal:** Python 3.8+, FastAPI, SQLite, Vanilla JS, Railway
+**Domínio unificado:** Backend e frontend no mesmo domínio `aviladevops.com.br`
 
 ## 🚀 Funcionalidades
 
-- **Dashboard Interativo**: Visualização de acertos e análises financeiras.
-- **Sincronização de Transações**: Integração com bancos para importação automática de dados.
-- **Autenticação Segura**: Sistema de login com roles de usuário (admin/usuário).
-- **Análise de Extratos**: Ferramentas para processar e analisar extratos bancários (CSV, OFX, PDF).
-- **API RESTful**: Backend em Python/FastAPI para operações CRUD e integração.
-- **Deploy Automatizado**: Configurado para deploy no Railway com domínio personalizado.
+- **Dashboard Interativo**: Visualização de acertos e análises financeiras com gráficos
+- **Importação de Extratos**: Processa arquivos CSV/OFX e extrai dados de transações
+- **Detecção Automática**: Identifica CPF/CNPJ e nomes de clientes nas descrições
+- **Autenticação com Roles**: Sistema de login (admin tem acesso total, users têm leitura)
+- **API RESTful**: Backend FastAPI com endpoints documentados (Swagger)
+- **Deploy Contínuo**: Push no GitHub → Railway faz deploy automático
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Backend**: Python, FastAPI, SQLite
-- **Deploy**: Railway, GitHub Pages (fallback)
-- **Outras**: Live-Server para desenvolvimento local, Pandas para análise de dados
+### Backend
+- **Python 3.8+**: Linguagem principal
+- **FastAPI**: Framework web moderno e rápido
+- **SQLite**: Banco de dados leve (persistido em volume Railway)
+- **Uvicorn**: Servidor ASGI
+- **Pandas**: Processamento de dados e análise de extratos
+- **OFXParse**: Parser de arquivos OFX bancários
+
+### Frontend
+- **HTML5/CSS3**: Interface responsiva
+- **JavaScript Vanilla**: Sem frameworks, leve e rápido
+- **Fetch API**: Comunicação com backend
+
+### DevOps
+- **Railway**: Plataforma de deploy com CI/CD automático
+- **Git/GitHub**: Controle de versão e trigger de deploys
+- **Docker**: Containerização (via Railpack)
+- **Live-Server**: Desenvolvimento local
 
 ## 📋 Pré-requisitos
 
@@ -70,36 +98,82 @@ Um sistema completo para controle de acertos financeiros da família, desenvolvi
 - **Senha:** `admin123` (mude em produção!)
 - Use o endpoint `/login` para obter um token e acessar recursos protegidos.
 
-## 🌐 Deploy no Railway
+## 🌐 Deploy no Railway (Produção)
 
-1. **Conecte o repositório ao Railway.**
-2. **Configure as variáveis de ambiente** em `RAILWAY-VARS.txt` no dashboard do Railway.
-3. **Defina o domínio personalizado:** `avilatransportes.com.br` no painel de domínios do serviço.
-4. **Deploy automático:** O Railway detecta pushes no GitHub e faz deploy.
+### Configuração Automática
 
-- **URL de Produção:** https://avilatransportes.com.br
+Este projeto está configurado para deploy contínuo no Railway:
+
+1. **Push para GitHub** → Railway detecta automaticamente
+2. **Build via Procfile** → Executa `bash start.sh`
+3. **Deploy completo** → Backend + Frontend no mesmo serviço
+
+### Variáveis de Ambiente (Railway Dashboard)
+
+Configure em **Variables** do serviço Railway (valores em `RAILWAY-VARS.txt`):
+
+```env
+DB_PATH=/data/clientes.db
+CORS_ORIGINS=https://aviladevops.com.br,http://127.0.0.1:5500
+PORT=8000
+```
+
+### Volume Persistente (Recomendado)
+
+Para persistir o banco de dados entre deploys:
+- Crie um **Volume** no Railway Dashboard
+- Mount path: `/data`
+- Isso garante que `clientes.db` não seja perdido em redeploys
+
+### Domínio
+
+- **URL de Produção:** https://aviladevops.com.br
+- **Health Check:** https://aviladevops.com.br/health
 
 ## 📚 Documentação da API
 
 ### Endpoints Principais
 
-- **GET /health** - Verifica status do servidor.
-- **POST /login** - Autenticação de usuário (retorna token).
-- **GET /usuarios** - Lista usuários (apenas admin).
-- **GET /sync/transacoes** - Lista transações (autenticado).
-- **POST /sync/transacoes** - Insere transações (apenas admin).
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/health` | Health check do servidor | Público |
+| POST | `/login` | Autenticação (retorna token) | Público |
+| GET | `/usuarios` | Lista usuários | Admin |
+| GET | `/sync/transacoes` | Lista transações | Autenticado |
+| POST | `/sync/transacoes` | Insere transações | Admin |
+| POST | `/usuarios/reset` | Reseta usuários | Admin |
 
 ### Autenticação
 
-- Use o header `Authorization: Bearer <token>` para endpoints protegidos.
-- Token padrão para admin: `admin-token` (configure em produção).
+**Header obrigatório para endpoints protegidos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Token padrão (desenvolvimento):** `admin-token`
+
+**⚠️ Produção:** Configure JWT real e hashing de senha (bcrypt/argon2)
+
+### Swagger UI
+
+Acesse a documentação interativa da API:
+- **Produção:** https://aviladevops.com.br/docs
+- **Local:** http://localhost:8000/docs
 
 ## 🔒 Segurança
 
-- **Banco de Dados:** SQLite com esquema seguro.
-- **CORS:** Configurado para domínios específicos.
-- **Roles:** Admin tem acesso total; usuários comuns têm leitura limitada.
-- **Nota:** Em produção, use hashing de senha (e.g., bcrypt) e JWT para tokens.
+### Configurações Atuais
+- **Banco de Dados:** SQLite com esquema seguro, volume persistente no Railway
+- **CORS:** Restrito a `aviladevops.com.br` e localhost dev
+- **Roles:** Admin (acesso total) / User (leitura limitada)
+- **Static Files:** Servidos pelo FastAPI (não requer servidor separado)
+
+### ⚠️ Para Produção Real
+- [ ] Implementar JWT com expiração (pyjwt ou python-jose)
+- [ ] Hashing de senha com bcrypt/argon2
+- [ ] Rate limiting nos endpoints de autenticação
+- [ ] HTTPS obrigatório (Railway já fornece)
 
 ## 🤝 Contribuindo
 
