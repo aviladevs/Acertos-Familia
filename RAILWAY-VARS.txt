@@ -5,9 +5,9 @@
 DB_PATH=/data/clientes.db
 
 # Configurações de domínio
-PRODUCTION_DOMAIN=https://api.avilatransportes.com.br
-FRONTEND_DOMAIN=https://avilatransportes.com.br
-CORS_ORIGINS=https://avilatransportes.com.br,http://127.0.0.1:5500
+PRODUCTION_DOMAIN=https://api.aviladevops.com.br
+FRONTEND_DOMAIN=https://aviladevops.com.br
+CORS_ORIGINS=https://aviladevops.com.br,http://127.0.0.1:5500
 
 # Configuração Railway
 PORT=8000
